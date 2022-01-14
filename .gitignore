@@ -1,0 +1,9 @@
+export.sh
+env/
+**egg-info
+db-data/
+database/
+*.pyc
+*.swp
+htmlcov/
+.coverage

@@ -18,7 +18,7 @@ def _gen_repr(clazz):
 
 class DailyStockPrice(Base):
     """Daily price data"""
-    __tablename__ = "daily_stock_price"
+    __tablename__ = "daily_stock_prices"
     id = Column(Integer, primary_key=True)
     ticker = Column(String(8))
     date = Column(Date)
@@ -40,5 +40,33 @@ class DailySMA(Base):
     style = Column(String(16))
     days = Column(Integer)
     value = Column(Float)
+    def __repr__(self):
+        return _gen_repr(self)
+
+
+class PortfolioSimulator(Base):
+    """Portfilio Simulator"""
+    __tablename__ = "portfolio_simulators"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(256))
+    opened = Column(Date)
+    date = Column(Date)
+    usd = Column(Float)
+    def __repr__(self):
+        return _gen_repr(self)
+
+
+class PortSimStockPosition(Base):
+    """Portfolio Simulator Stock Positions"""
+    __tablename__ = "port_sim_stock_positions"
+    id = Column(Integer, primary_key=True)
+    def __repr__(self):
+        return _gen_repr(self)
+
+
+class PortSimStockTransaction(Base):
+    """Portfolio Simulator Stock Transaction"""
+    __tablename__ = "port_sim_stock_transactions"
+    id = Column(Integer, primary_key=True)
     def __repr__(self):
         return _gen_repr(self)

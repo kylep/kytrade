@@ -6,7 +6,7 @@ from kytrade.cli.calc import calc
 from kytrade.cli.pprint import pprint
 from kytrade.cli.download import download
 from kytrade.cli.init import init
-from kytrade.cli.backtest import backtest
+from kytrade.cli.portfolio_simulator import portfolio_simulator as ps
 
 
 if sys.version_info[0] < 3:
@@ -30,4 +30,4 @@ shell.add_command(pprint)
 shell.add_command(download)
 shell.add_command(init)
 shell.add_command(calc)
-shell.add_command(backtest)
+shell.add_command(ps)

@@ -26,7 +26,7 @@ def init_create_tables():
     models.Base.metadata.create_all(engine)
 
 
-def session() -> Session:
+def get_session() -> Session:
     """Get a session for this engine"""
     return Session(engine)
 

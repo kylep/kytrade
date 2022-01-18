@@ -2,6 +2,7 @@
 import click
 
 import kytrade.portfolio_simulator as ps
+from kytrade.cli.common import get_table
 
 
 @click.group(name="ps")
@@ -21,7 +22,9 @@ def create(name, date):
 @click.command(name="list")
 def _list():
     """list instances"""
-    click.echo(ps.list_portfiolio_sims())
+    portfolios = ps.list_portfiolio_sims()
+    table = get_table(portfolios)
+    click.echo(table)
 
 
 @click.command()

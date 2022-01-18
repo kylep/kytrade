@@ -1,5 +1,5 @@
 pytest
-pytest_mock
+pytest-mock
 pytest-cov
 black
 pylint

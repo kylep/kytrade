@@ -6,21 +6,31 @@
 import os
 import sys
 
-from pandas.core.frame import DataFrame
 from alpha_vantage.timeseries import TimeSeries
 
+from kytrade.data import models
 from kytrade.const import ALPHAVANTAGE_API_KEY
 
 
-def get_daily_stock_prices(ticker, compact=False):
-    """Return the daily history of a given ticker - compact returns the most recent 1000 points"""
+def get_daily_stock_prices(ticker: str, compact=False) -> list:
+    """Return a list of models.DailyStockPrice objects"""
     outputsize = "compact" if compact else "full"
-    # pylint: disable-msg=W0632
-    # W0632: ts.get_daily does not return a tuple with 3 entries when output_format == pandas
-    ts = TimeSeries(key=ALPHAVANTAGE_API_KEY, output_format="pandas")
-    df, metadata = ts.get_daily(ticker, outputsize=outputsize)
-    df = DataFrame(df)
-    # fix the pandas columns to remove numeric prefixes: "1. open" -> "open"
-    df_cols = [i.split(" ")[1] for i in df.columns]
-    df.columns = df_cols
-    return (df, metadata)
+    ts = TimeSeries(key=ALPHAVANTAGE_API_KEY)
+    daily_vals = ts.get_daily(ticker, outputsize=outputsize)
+    orm_instances = []
+    for date, values in daily_vals[0].items():
+        orm_instance = models.DailyStockPrice()
+        orm_instance.ticker = ticker
+        orm_instance.date = date
+        orm_instance.open = values["1. open"]
+        orm_instance.high = values["2. high"]
+        orm_instance.low = values["3. low"]
+        orm_instance.close = values["4. close"]
+        orm_instance.volume = values["5. volume"]
+        orm_instances.append(orm_instance)
+    return orm_instances
+    # df = DataFrame(df)
+    # # fix the pandas columns to remove numeric prefixes: "1. open" -> "open"
+    # df_cols = [i.split(" ")[1] for i in df.columns]
+    # df.columns = df_cols
+    # return (df, metadata)

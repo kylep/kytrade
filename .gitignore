@@ -7,3 +7,4 @@ database/
 *.swp
 htmlcov/
 .coverage
+build/

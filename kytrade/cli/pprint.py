@@ -1,6 +1,7 @@
 """ Print commands """
 import click
 import kytrade.data.daily_stock_price as dsp
+from kytrade.cli.common import get_table
 
 
 @click.group(name="print")
@@ -16,7 +17,9 @@ def pprint():
 @click.command()
 def daily_prices(ticker, from_date, limit):
     """Print the saved prices data"""
-    click.echo(dsp.fetch(ticker, from_date, limit))
+    daily_stock_prices = dsp.fetch(ticker, from_date, limit)
+    table = get_table(daily_stock_prices)
+    click.echo(table)
 
 
 pprint.add_command(daily_prices)

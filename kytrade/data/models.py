@@ -60,6 +60,9 @@ class PortSimStockPosition(Base):
     """Portfolio Simulator Stock Positions"""
     __tablename__ = "port_sim_stock_positions"
     id = Column(Integer, primary_key=True)
+    portfolio_id = Column(Integer)
+    qty = Column(Integer)
+    ticker = Column(String(8))
     def __repr__(self):
         return _gen_repr(self)
 
@@ -68,5 +71,11 @@ class PortSimStockTransaction(Base):
     """Portfolio Simulator Stock Transaction"""
     __tablename__ = "port_sim_stock_transactions"
     id = Column(Integer, primary_key=True)
+    position_id = Column(Integer)
+    date = Column(Date)
+    qty = Column(Integer)
+    unit_price = Column(Float)
     def __repr__(self):
         return _gen_repr(self)
+
+

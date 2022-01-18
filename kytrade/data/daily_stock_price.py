@@ -8,6 +8,9 @@ from kytrade.data.db import get_session
 from kytrade.data.models import DailyStockPrice
 
 
+class StockDataNotFound(Exception):
+    """Failed to find expected share data"""
+
 def download_daily_stock_prices(ticker) -> None:
     """Save <=20 yrs of TICKER daily data to db"""
     session = get_session()
@@ -27,4 +30,7 @@ def fetch(ticker=None, from_date=None, limit=0) -> list:
         query = query.where(DailyStockPrice.date <= dt)
     if limit > 0:
         query = query.limit(limit)
-    return [elem[0] for elem in get_session().execute(query).all()]
+    price_data = [elem[0] for elem in get_session().execute(query).all()]
+    if not price_data:
+        msg = f"Failed to fetch stock prices for {ticker} at {from_date} from the database"
+        raise StockDataNotFound(msg)

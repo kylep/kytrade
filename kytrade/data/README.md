@@ -71,6 +71,8 @@ statement = (
 session.execute(statement)
 session.commit()
 
+# Or just add it using the session it was created with the commit
+
 
 # Delete Query
 statement = delete(DailyStockPrice).where(DailyStockPrice.ticker == "FOO")

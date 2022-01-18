@@ -6,8 +6,12 @@ def get_table(data: list):
     """Get a nicely formatted table from a list of ORM objects"""
     if not data:
         return ""
-    print(data[0])
-    headers = ["id"] + [key for key in data[0].__dict__.keys() if not key.startswith("_")]
+    # automatically generate the table headers
+    keys = sorted([key for key in data[0].__dict__.keys() if not key.startswith("_")])
+    if "id" in keys:
+        # ID should go on the left of the table
+        keys.remove("id")
+        headers = ["id"] + keys
     table = BeautifulTable(maxwidth=100)
     table.set_style(BeautifulTable.STYLE_MARKDOWN)
     table.columns.header = headers

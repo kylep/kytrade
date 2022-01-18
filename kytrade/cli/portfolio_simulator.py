@@ -15,7 +15,8 @@ def portfolio_simulator():
 @click.command()
 def create(name, date):
     """Create a simulated portfolio instance"""
-    ps.create_portfiolio_sim(name, date)
+    portfolio = ps.Portfolio(name, date)
+    portfolio.save()
     click.echo("Done")
 
 
@@ -37,11 +38,21 @@ def details():
 @click.command()
 def delete(id):
     """Print a detailed overview of a portfolio instance"""
-    ps.delete_portfolio_sim(id)
+    ps.Portfolio(id).delete()
     click.echo(f"Done")
+
+
+@click.option("--usd", default=0.00, help="Dollars USD to add")
+@click.argument("id")
+@click.command()
+def add_funds(id, usd):
+    portfolio = ps.Portfolio.load(id)
+    portfolio.balance += usd
+    portfolio.save()
 
 
 portfolio_simulator.add_command(create)
 portfolio_simulator.add_command(_list)
 portfolio_simulator.add_command(details)
 portfolio_simulator.add_command(delete)
+portfolio_simulator.add_command(add_funds)

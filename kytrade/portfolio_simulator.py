@@ -16,8 +16,10 @@ class Portfolio:
         """ Instantiate a new Portfolio Simulator instance """
         ps = models.PortfolioSimulator()
         ps.name = name
-        ps.date = datetime.date.fromisoformat(date)
+        ps.date = datetime.date.fromisoformat(str(date))
         ps.usd = 0
+        ps.opened = ps.date
+        self.session = get_session()
         self.orm_ps = ps  # The DB portfolio_simulators row in ObjectRelationalModel format
         self.id = None  # Until saved
         self.on_open = []   # list of Strategy's to execute on market open
@@ -28,8 +30,10 @@ class Portfolio:
     def load(ps_id):
         """Create a new Portfolio in the db and return its simulator object - date: YYYY-MM-DD"""
         query = select(models.PortfolioSimulator).where(models.PortfolioSimulator.id == ps_id)
-        orm_ps = get_session().execute(query).one()[0]
+        session = get_session()
+        orm_ps = session.execute(query).one()[0]
         instance = Portfolio(orm_ps.name, orm_ps.date)
+        instance.session = session
         instance.orm_ps = orm_ps
         return instance
 
@@ -43,18 +47,16 @@ class Portfolio:
         # Reminder: When implementing logging, log changes to balance
         self.orm_ps.usd = value
 
-    def save():
+    def save(self):
         """Save this portfolio instance to the database"""
-        self.session = get_session()
-        session.add(self.orm_ps)
-        session.commit()
-        session.refresh(self.orm_ps)  # refresh adds the .id property
+        self.session.add(self.orm_ps)
+        self.session.commit()
+        self.session.refresh(self.orm_ps)  # refresh adds the .id property
 
     def delete(self):
         """Delete this portfolio simulator instance"""
-        session = get_session()
-        session.delete(self.orm["PortfolioSimulator"])
-        session.commit()
+        self.session.delete(self.orm["PortfolioSimulator"])
+        self.session.commit()
 
     def advance_one_day(self):
         """Advance one day"""
@@ -69,6 +71,7 @@ class Portfolio:
 
     def add_shares(self):
         """Add shares, creating a new position if needed"""
+
 
 
 def list_portfiolio_sims() -> list:

@@ -22,10 +22,10 @@ def mock_daily_stock_price(mocker):
             id=1,
             date="1900-01-01",
             ticker="FOO",
-            open=10.12,
-            close=12.34,
-            high=14.14,
-            low=9.23,
+            open=100.11,
+            close=200.22,
+            high=300.33,
+            low=10.10,
             volume=9001,
         )
     ]
@@ -90,13 +90,40 @@ def test_portfolio_buy_sell_stock(mock_session, mock_daily_stock_price):
     with pytest.raises(portfolio_simulator.InsufficientFundsError):
         portsim.buy_stock(ticker="FOO", qty=10, at="open")  # mocked from mock_daily_stock_price
     assert not portsim.stock_positions
+    assert not portsim.stock_transactions
     # buy shares with some money
-    balance = 9999.99
-    portsim.balance = balance
-    portsim.buy_stock(ticker="FOO", qty=10, at="open")  # mocked from mock_daily_stock_price
+    start_balance = 9999.99
+    buy_qty = 10
+    portsim.balance = start_balance
+    portsim.buy_stock(ticker="FOO", qty=buy_qty, at="open")  # mocked from mock_daily_stock_price
+    # a stock_position and stock_transaction should be created
     assert portsim.stock_positions
     assert len(portsim.stock_positions) == 1
+    assert len(portsim.stock_transactions) == 1
+    # the stock_position should hold the ticker and quantity, and the balance should be lower
     assert portsim.stock_positions[0].ticker == "FOO"
-    assert portsim.stock_positions[0].qty == 10
+    assert portsim.stock_positions[0].qty == buy_qty
+    assert portsim.balance < start_balance
+    # the balance should be the starting balance minus the transaction cost
+    unit_price = portsim.stock_transactions[0].unit_price
+    new_balance = start_balance - (unit_price * buy_qty)
+    assert portsim.balance == new_balance
+    # the transaction should show that it was a BUY and link to the id of the stock position
+    assert portsim.stock_transactions[0].action == "BUY"
+    assert portsim.stock_transactions[0].position_id == portsim.stock_positions[0].id
+    portsim.buy_stock(ticker="FOO", qty=buy_qty, at="open")  # mocked from mock_daily_stock_price
+    # new stock positions should only be made for new shares
+    assert len(portsim.stock_positions) == 1
+    # new transactions made for each buy
+    assert len(portsim.stock_transactions) == 2
+    # list ordering is ok
+    assert portsim.stock_transactions[1].position_id == portsim.stock_positions[0].id
+    with pytest.raises(portfolio_simulator.InsufficientFundsError):
+        portsim.buy_stock(ticker="FOO", qty=9999, at="open")  # mocked from mock_daily_stock_price
+    with pytest.raises(portfolio_simulator.InsufficientSharesError):
+        portsim.sell_stock("FOO", 9999, at="close")
+
+
+
 
 

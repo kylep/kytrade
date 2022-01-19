@@ -14,10 +14,10 @@ def _get_ps_table(portfolios: list):
         positions = ", ".join([f"{pos.ticker}({pos.qty})" for pos in portfolio.stock_positions])
         num_transactions = len(portfolio.stock_transactions)
         row = [
-            portfolio.orm_ps.id,
-            portfolio.orm_ps.name,
+            portfolio.id,
+            portfolio.name,
             str(portfolio.orm_ps.opened),
-            str(portfolio.orm_ps.date),
+            str(portfolio.date),
             f"{portfolio.balance:.2f}",
             num_transactions,
             f"{portfolio.tx_profit:.2f}",
@@ -47,7 +47,7 @@ def create(name, date):
 @click.command(name="list")
 def _list():
     """list instances"""
-    portfolios = [ps.Portfolio.load(sim.id) for sim in ps.list_portfiolio_sims()]
+    portfolios = ps.list_portfolios()
     table = _get_ps_table(portfolios)
     click.echo(table)
 
@@ -74,6 +74,8 @@ def add_funds(id, usd):
     portfolio = ps.Portfolio.load(id)
     portfolio.balance += usd
     portfolio.save()
+    table = _get_ps_table([portfolio])
+    click.echo(table)
 
 @click.option("--comp/--no-comp", default=False, help="--comp for free shares")
 @click.option("--close/--open", default=False, help="buy at open or close - default: open")
@@ -85,7 +87,21 @@ def buy_stock(id, ticker, qty, close, comp):
     """Buy qty shares of ticker """
     portfolio = ps.Portfolio.load(id)
     at = "close" if close else "open"
-    portfolio.buy_stock(ticker=ticker, qty=int(qty), at=at, comp=comp)
+    portfolio.buy_stock(ticker=ticker.upper(), qty=int(qty), at=at, comp=comp)
+    portfolio.save()
+    table = _get_ps_table([portfolio])
+    click.echo(table)
+
+@click.option("--close/--open", default=False, help="buy at open or close - default: open")
+@click.option("--qty", "-n", required=True, help="Qty to buy")
+@click.option("--ticker", "-t", required=True, help="Stock ticker")
+@click.argument("id")
+@click.command()
+def sell_stock(id, ticker, qty, close):
+    """Sell qty shares of ticker """
+    portfolio = ps.Portfolio.load(id)
+    at = "close" if close else "open"
+    portfolio.sell_stock(ticker=ticker.upper(), qty=int(qty), at=at)
     portfolio.save()
     table = _get_ps_table([portfolio])
     click.echo(table)
@@ -97,3 +113,4 @@ portfolio_simulator.add_command(details)
 portfolio_simulator.add_command(delete)
 portfolio_simulator.add_command(add_funds)
 portfolio_simulator.add_command(buy_stock)
+portfolio_simulator.add_command(sell_stock)

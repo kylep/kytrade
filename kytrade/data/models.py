@@ -48,8 +48,9 @@ class DailySMA(Base):
 class PortfolioSimulator(Base):
     """Portfilio Simulator"""
     __tablename__ = "portfolio_simulators"
+    __table_args__ = (UniqueConstraint("name"),)
     id = Column(Integer, primary_key=True)
-    name = Column(String(256))
+    name = Column(String(256), )
     opened = Column(Date)
     date = Column(Date)
     usd = Column(Float)
@@ -71,6 +72,7 @@ class PortfolioSimulatorBalanceHistoryDay(Base):
 class PortSimStockPosition(Base):
     """Portfolio Simulator Stock Positions"""
     __tablename__ = "port_sim_stock_positions"
+    __table_args__ = (UniqueConstraint("portfolio_id", "ticker", name='portfolio_ticker'),)
     id = Column(Integer, primary_key=True)
     portfolio_id = Column(Integer)
     qty = Column(Integer)

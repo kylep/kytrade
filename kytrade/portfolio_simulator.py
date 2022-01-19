@@ -1,6 +1,6 @@
-
 import datetime
-from sqlalchemy import select, delete, desc
+from sqlalchemy import select, delete, desc, or_
+from sqlalchemy.exc import NoResultFound
 
 from kytrade.data.db import get_session
 from kytrade.data import models
@@ -10,13 +10,16 @@ from kytrade.data import daily_stock_price
 class InsufficientFundsError(Exception):
     """Balance is too low to buy"""
 
+
 class InsufficientSharesError(Exception):
     """Can't remove shares you don't have"""
 
+
 class Portfolio:
-    """ Portfolio Simulator """
+    """Portfolio Simulator"""
+
     def __init__(self, name: str, date: str):
-        """ Instantiate a new Portfolio Simulator instance """
+        """Instantiate a new Portfolio Simulator instance"""
         ps = models.PortfolioSimulator()
         ps.name = name
         ps.date = datetime.date.fromisoformat(str(date))
@@ -27,14 +30,19 @@ class Portfolio:
         self.orm_stock_positions = []  # list of PortSimStockPosition objects
         self.orm_stock_transactions = []  # list of PortSimStockTransaction objects
         self.ps_balance_history = []  # list of PortfolioSimulatorBalanceHistoryDay objects
-        self.on_open = []   # list of Strategy's to execute on market open
+        self.on_open = []  # list of Strategy's to execute on market open
         self.on_close = []  # ...to execute on market close
 
     @staticmethod
-    def load(ps_id):
+    def load(name_or_id):
         """Load a Portfolio gtom the db by id and return its portfolio simulator object"""
-        query = select(models.PortfolioSimulator).where(models.PortfolioSimulator.id == ps_id)
         session = get_session()
+        query = select(models.PortfolioSimulator).where(
+            or_(
+                models.PortfolioSimulator.id == name_or_id,
+                models.PortfolioSimulator.name == name_or_id,
+            )
+        )
         orm_ps = session.execute(query).one()[0]
         instance = Portfolio(orm_ps.name, orm_ps.date)
         instance.session = session  # Otherwise the orm_object is bound to the wrong session
@@ -65,15 +73,28 @@ class Portfolio:
         return self.orm_ps.name
 
     @property
+    def id(self):
+        """Get the portfolio ID - save the portfolio first to generate it if needed"""
+        if self.orm_ps.id:
+            return self.orm_ps.id
+        self.session.add(self.orm_ps)
+        self.session.commit()
+        self.session.refreshself.orm_ps()
+        if not self.orm_ps.id:
+            # This should never happen, unless...
+            raise Exception("Failed to get ID for portfolio - is auto-increment broken?")
+        return self.orm_ps.id
+
+
+    @property
     def stock_positions(self):
         """Get the stock positions - read from DB on first query"""
         if not self.orm_stock_positions:
-            query = (
-                select(models.PortSimStockPosition)
-                .where(models.PortSimStockPosition.portfolio_id == self.orm_ps.id)
+            query = select(models.PortSimStockPosition).where(
+                models.PortSimStockPosition.portfolio_id == self.id
             )
-            positions = self.session.execute(query).all()
-            self.orm_stock_positions = positions
+            positions = self.session.execute(query).all()  # returns a list of tupples (<data>,)
+            self.orm_stock_positions = [pos[0] for pos in positions]
         return self.orm_stock_positions
 
     @property
@@ -81,11 +102,11 @@ class Portfolio:
         """List of PortSimStockTransaction orm objects"""
         if not self.orm_stock_transactions:
             for position in self.stock_positions:
-                query = (
-                    select(models.PortSimStockTransaction)
-                    .where(models.PortSimStockTransaction.position_id == self.orm_ps.id)
+                query = select(models.PortSimStockTransaction).where(
+                    models.PortSimStockTransaction.position_id == self.id
                 )
                 transactions = self.session.execute(query).all()
+                transactions = [tx[0] for tx in transactions]  # de-tuppling
                 self.orm_stock_transactions += transactions
         return self.orm_stock_transactions
 
@@ -95,7 +116,7 @@ class Portfolio:
         tx_profit = 0
         for transaction in self.stock_transactions:
             multiplier = 1 if transaction.action == "sell" else -1  # buy subtracts, sell adds $
-            tx_profit += (multiplier * transaction.qty * transaction.unit_price)
+            tx_profit += multiplier * transaction.qty * transaction.unit_price
         return tx_profit
 
     def advance_one_day(self):
@@ -113,15 +134,14 @@ class Portfolio:
         """Add shares, creating a new position if needed"""
         position = next((pos for pos in self.stock_positions if pos.ticker == ticker), None)
         if not position:
-            position = models.PortSimStockPosition(ticker=ticker, qty=0)
+            position = models.PortSimStockPosition(portfolio_id=self.id, ticker=ticker, qty=0)
             self.orm_stock_positions.append(position)
         position.qty += qty
-
 
     def remove_stock(self, ticker, qty):
         """Remove shares, but keep the position option with 0 qty
 
-           Raise InsufficientSharesError if not enough shares exist
+        Raise InsufficientSharesError if not enough shares exist
         """
         position = next((pos for pos in self.stock_positions if pos.ticker == ticker), None)
         current_qty = position.qty if position else 0
@@ -132,27 +152,23 @@ class Portfolio:
 
     def log_transaction(self, ticker: str, qty: int, unit_price: float, action: str):
         """Add a stock transaction to this portfolio's stock transaction log
-           action: BUY or SELL
+        action: BUY or SELL
         """
         position = next((pos for pos in self.orm_stock_positions if pos.ticker == ticker))
         transaction = models.PortSimStockTransaction(
-            position_id=position.id,
-            date=self.date,
-            qty=qty,
-            unit_price=unit_price,
-            action=action
+            position_id=position.id, date=self.date, qty=qty, unit_price=unit_price, action=action
         )
         self.orm_stock_transactions.append(transaction)
 
-    def buy_stock(self, ticker:str, qty: int, at: str, price=None, comp=False):
+    def buy_stock(self, ticker: str, qty: int, at: str, price=None, comp=False):
         """Add shares and subtract the cost from the balance - exception if overdrawn
-           at: open, close, price
-           price: used instead of open/close when at:price is specified
-           comp: complimentary - add the price to balance before buying
+        at: open, close, price
+        price: used instead of open/close when at:price is specified
+        comp: complimentary - add the price to balance before buying
         """
         dsp = daily_stock_price.fetch(ticker, from_date=self.date, limit=1)[0]
         price = price if price else getattr(dsp, at)
-        total_price = (price * qty)
+        total_price = price * qty
         if comp:
             self.balance += total_price
         self.balance -= total_price
@@ -161,13 +177,13 @@ class Portfolio:
 
     def sell_stock(self, ticker: str, qty: int, at: str, price=None):
         """Sell shares and add the total to the balance - exception if shares are not owned
-           at: open, close, price
-           price: used instead of open/close when at:price is specified
+        at: open, close, price
+        price: used instead of open/close when at:price is specified
         """
         dsp = daily_stock_price.fetch(ticker, from_date=self.date, limit=1)[0]
         price = price if price else getattr(dsp, at)
         self.remove_stock(ticker, qty)
-        self.balance += (price * qty)
+        self.balance += price * qty
         self.log_transaction(ticker=ticker, qty=qty, unit_price=price, action="SELL")
 
     def save(self):
@@ -176,8 +192,6 @@ class Portfolio:
         for item in to_save:
             self.session.add(item)
         self.session.commit()
-        # for item in to_save:
-        self.session.refresh(self.orm_ps)
 
     def delete(self):
         """Delete this portfolio simulator instance"""
@@ -190,10 +204,8 @@ class Portfolio:
         self.session.commit()
 
 
-
-
-def list_portfiolio_sims() -> list:
+def list_portfolios() -> list:
     """List all portfolio_sims decending by date"""
     query = select(models.PortfolioSimulator).order_by(desc(models.PortfolioSimulator.date))
-    # fix the return data - the returned list is of 1-element tupples initially
-    return [elem[0] for elem in get_session().execute(query).all()]
+    ps_orm_list = [elem[0] for elem in get_session().execute(query).all()]
+    return [Portfolio.load(sim.id) for sim in ps_orm_list]

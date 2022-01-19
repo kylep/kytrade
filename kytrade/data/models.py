@@ -1,6 +1,6 @@
 """SQL Alchemy models"""
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, String, Integer, Date, Float
+from sqlalchemy import Column, String, Integer, Date, Float, UniqueConstraint
 
 # too-few-public-methods is not appropriate in ORM classes
 # pylint: disable=too-few-public-methods
@@ -19,6 +19,7 @@ def _gen_repr(clazz):
 class DailyStockPrice(Base):
     """Daily price data"""
     __tablename__ = "daily_stock_prices"
+    __table_args__ = (UniqueConstraint("ticker", "date", name='ticker_date'),)
     id = Column(Integer, primary_key=True)
     ticker = Column(String(8))
     date = Column(Date)
@@ -56,6 +57,17 @@ class PortfolioSimulator(Base):
         return _gen_repr(self)
 
 
+class PortfolioSimulatorBalanceHistoryDay(Base):
+    """Portfilio Simulator Balance on a given day"""
+    __tablename__ = "portfolio_simulator_balance_history_days"
+    id = Column(Integer, primary_key=True)
+    portfolio_id = Column(Integer)
+    date = Column(Date)
+    usd = Column(Float)
+    def __repr__(self):
+        return _gen_repr(self)
+
+
 class PortSimStockPosition(Base):
     """Portfolio Simulator Stock Positions"""
     __tablename__ = "port_sim_stock_positions"
@@ -75,6 +87,7 @@ class PortSimStockTransaction(Base):
     date = Column(Date)
     qty = Column(Integer)
     unit_price = Column(Float)
+    action = Column(String(4))  # "buy" / "sell"  - Consider using an enum... compatability issues?
     def __repr__(self):
         return _gen_repr(self)
 

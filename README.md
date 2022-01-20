@@ -87,6 +87,8 @@ kt download daily-stock-prices SPY
 
 ## Portfolio Simulator
 
+### Creating and deleting portfolios
+
 List all current portfolio simulator instances.
 The ID and name printed can both be used with the other `kt ps` commands.
 ```
@@ -98,6 +100,14 @@ Create a simulated portfolio instance, starting the simulation at a given date.
 kt ps create [NAME] --date [YYYY-MM-DD]
 ```
 
+Delete a portfolio simulator instance. The numeric ID can be found from `kt ps list`.
+```
+kt ps delete [ID]
+```
+
+
+### Manually operating the portfolio
+
 Add some funds to the portfolio simulator.
 `[PS ID]` refers to the name or id of the portfolio simulator.
 ```
@@ -106,18 +116,19 @@ kt ps add-funds [PS ID] --usd [DOLLARS]
 
 Buy some shares - see `--help` for shorthand options:
 ```
-kt ps buy-stock [PS ID] --ticker [TICKER] --qty [QUANTITY] [--open/--close] [--comp/--no-comp]
+kt ps tx buy-stock [PS ID] --ticker [TICKER] --qty [QUANTITY] [--open/--close] [--comp/--no-comp]
 ```
 
 Sell some shares:
 ```
-kt ps sell-stock [PS ID] --ticker [TICKER] --qty [QUANTITY] [--open/--close]
+kt ps tx sell-stock [PS ID] --ticker [TICKER] --qty [QUANTITY] [--open/--close]
 ```
 
-Delete a portfolio simulator instance. The numeric ID can be found from `kt ps list`.
+List the trasactions of a portfolio:
 ```
-kt ps delete [ID]
+kt ps tx list [PS ID]
 ```
+
 
 
 ## Displaying saved data

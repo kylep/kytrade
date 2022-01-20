@@ -117,7 +117,7 @@ class Portfolio:
         """Profit from all the transactions so far + the value of current positions"""
         tx_profit = 0
         for transaction in self.stock_transactions:
-            multiplier = 1 if transaction.action == "sell" else -1  # buy subtracts, sell adds $
+            multiplier = 1 if transaction.action == "SELL" else -1  # buy subtracts, sell adds $
             tx_profit += multiplier * transaction.qty * transaction.unit_price
         return tx_profit
 

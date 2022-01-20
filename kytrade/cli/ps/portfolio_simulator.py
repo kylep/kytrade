@@ -3,6 +3,7 @@ import click
 from beautifultable import BeautifulTable
 
 import kytrade.portfolio_simulator as ps
+from kytrade.cli.ps.tx import tx
 
 
 def _get_ps_table(portfolios: list):
@@ -61,7 +62,7 @@ def details():
 @click.argument("id")
 @click.command()
 def delete(id):
-    """Print a detailed overview of a portfolio instance"""
+    """Delete a portfolio"""
     ps.Portfolio.load(id).delete()
     click.echo(f"Done")
 
@@ -77,34 +78,6 @@ def add_funds(id, usd):
     table = _get_ps_table([portfolio])
     click.echo(table)
 
-@click.option("--comp/--no-comp", default=False, help="--comp for free shares")
-@click.option("--close/--open", default=False, help="buy at open or close - default: open")
-@click.option("--qty", "-n", required=True, help="Qty to buy")
-@click.option("--ticker", "-t", required=True, help="Stock ticker")
-@click.argument("id")
-@click.command()
-def buy_stock(id, ticker, qty, close, comp):
-    """Buy qty shares of ticker """
-    portfolio = ps.Portfolio.load(id)
-    at = "close" if close else "open"
-    portfolio.buy_stock(ticker=ticker.upper(), qty=int(qty), at=at, comp=comp)
-    portfolio.save()
-    table = _get_ps_table([portfolio])
-    click.echo(table)
-
-@click.option("--close/--open", default=False, help="buy at open or close - default: open")
-@click.option("--qty", "-n", required=True, help="Qty to buy")
-@click.option("--ticker", "-t", required=True, help="Stock ticker")
-@click.argument("id")
-@click.command()
-def sell_stock(id, ticker, qty, close):
-    """Sell qty shares of ticker """
-    portfolio = ps.Portfolio.load(id)
-    at = "close" if close else "open"
-    portfolio.sell_stock(ticker=ticker.upper(), qty=int(qty), at=at)
-    portfolio.save()
-    table = _get_ps_table([portfolio])
-    click.echo(table)
 
 
 portfolio_simulator.add_command(create)
@@ -112,5 +85,4 @@ portfolio_simulator.add_command(_list)
 portfolio_simulator.add_command(details)
 portfolio_simulator.add_command(delete)
 portfolio_simulator.add_command(add_funds)
-portfolio_simulator.add_command(buy_stock)
-portfolio_simulator.add_command(sell_stock)
+portfolio_simulator.add_command(tx)

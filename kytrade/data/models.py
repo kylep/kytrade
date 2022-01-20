@@ -85,7 +85,8 @@ class PortSimStockTransaction(Base):
     """Portfolio Simulator Stock Transaction"""
     __tablename__ = "port_sim_stock_transactions"
     id = Column(Integer, primary_key=True)
-    position_id = Column(Integer)
+    portfolio_id= Column(Integer)
+    ticker = Column(String(8))
     date = Column(Date)
     qty = Column(Integer)
     unit_price = Column(Float)

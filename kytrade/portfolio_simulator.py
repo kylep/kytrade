@@ -85,7 +85,6 @@ class Portfolio:
             raise Exception("Failed to get ID for portfolio - is auto-increment broken?")
         return self.orm_ps.id
 
-
     @property
     def stock_positions(self):
         """Get the stock positions - read from DB on first query"""
@@ -94,20 +93,23 @@ class Portfolio:
                 models.PortSimStockPosition.portfolio_id == self.id
             )
             positions = self.session.execute(query).all()  # returns a list of tupples (<data>,)
-            self.orm_stock_positions = [pos[0] for pos in positions]
+            self.orm_stock_positions = [pos[0] for pos in positions]  # de-tuppling
         return self.orm_stock_positions
 
     @property
     def stock_transactions(self):
         """List of PortSimStockTransaction orm objects"""
         if not self.orm_stock_transactions:
-            for position in self.stock_positions:
-                query = select(models.PortSimStockTransaction).where(
-                    models.PortSimStockTransaction.position_id == self.id
-                )
-                transactions = self.session.execute(query).all()
-                transactions = [tx[0] for tx in transactions]  # de-tuppling
-                self.orm_stock_transactions += transactions
+            # Note: I had been using position_id here and not saving the ticker in the transactions
+            # but the ID wasn't getting generated in time to be useful. If I used UUIDs that would
+            # fix this problem, or I could just save json strings with each portfolio
+            # ...thinking on it
+            query = select(models.PortSimStockTransaction).where(
+                models.PortSimStockTransaction.portfolio_id == self.id
+            )
+            transactions = self.session.execute(query).all()
+            transactions = [tx[0] for tx in transactions]  # de-tuppling
+            self.orm_stock_transactions += transactions
         return self.orm_stock_transactions
 
     @property
@@ -154,9 +156,13 @@ class Portfolio:
         """Add a stock transaction to this portfolio's stock transaction log
         action: BUY or SELL
         """
-        position = next((pos for pos in self.orm_stock_positions if pos.ticker == ticker))
         transaction = models.PortSimStockTransaction(
-            position_id=position.id, date=self.date, qty=qty, unit_price=unit_price, action=action
+            portfolio_id = self.id,
+            ticker=ticker,
+            date=self.date,
+            qty=qty,
+            unit_price=unit_price,
+            action=action,
         )
         self.orm_stock_transactions.append(transaction)
 
@@ -188,9 +194,15 @@ class Portfolio:
 
     def save(self):
         """Save this portfolio instance to the database"""
-        to_save = [self.orm_ps] + self.orm_stock_transactions + self.orm_stock_positions
-        for item in to_save:
-            self.session.add(item)
+        # Save the ps
+        self.session.add(self.orm_ps)
+        self.session.commit()
+        self.session.refresh(self.orm_ps)  # Refresh the portfolio ID
+        # Save each transaction - make sure they link to this portfolio
+        # TODO: change the tx schema to track ticker and portfolio ID instead of position ID
+        for record in self.orm_stock_positions + self.orm_stock_transactions:
+            record.portfolio_id = self.id
+            self.session.add(record)
         self.session.commit()
 
     def delete(self):

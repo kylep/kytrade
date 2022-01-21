@@ -3,6 +3,7 @@ import click
 from beautifultable import BeautifulTable
 
 import kytrade.portfolio_simulator as ps
+from kytrade.data import models
 
 
 @click.group()
@@ -15,18 +16,17 @@ def tx():
 def _list(id):
     """List the transactions"""
     portfolio = ps.Portfolio.load(id)
-    table = BeautifulTable(maxwidth=120)
-    table.set_style(BeautifulTable.STYLE_MARKDOWN)
-    headers = ["date", "ticker", "qty", "unit_price", "action", "total"]
-    running_total = 0
-    for tx in portfolio.stock_transactions:
-        multiplier = 1 if tx.action == "SELL" else -1
-        total = multiplier * tx.qty* tx.unit_price
-        running_total += total
-        row = [tx.date, tx.ticker, tx.qty, tx.unit_price, tx.action, total]
-        table.rows.append(row)
-    table.rows.append(["-"]*5+[running_total])
-    click.echo(table)
+    all_tx = portfolio.stock_transactions + portfolio.cash_operations
+    all_tx.sort(key=lambda obj: obj.date)
+    for tx in all_tx:
+        if isinstance(tx, models.PortSimStockTransaction):
+            tx_total = tx.unit_price * tx.qty
+            click.echo(
+                f"{tx.date}  -  {tx.action}\t"
+                f"{tx.qty} {tx.ticker} @ ${tx.unit_price:.2f} for ${tx_total:.2f}"
+            )
+        elif isinstance(tx, models.PortSimCashOperation):
+            click.echo(f"{tx.date}  -  {tx.action}\t${tx.usd:.2f}")
 
 
 @click.option("--comp/--no-comp", default=False, help="--comp for free shares")
@@ -36,13 +36,11 @@ def _list(id):
 @click.argument("id")
 @click.command()
 def buy_stock(id, ticker, qty, close, comp):
-    """Buy qty shares of ticker """
+    """Buy qty shares of ticker"""
     portfolio = ps.Portfolio.load(id)
     at = "close" if close else "open"
     portfolio.buy_stock(ticker=ticker.upper(), qty=int(qty), at=at, comp=comp)
     portfolio.save()
-    table = _get_ps_table([portfolio])
-    click.echo(table)
 
 
 @click.option("--close/--open", default=False, help="buy at open or close - default: open")
@@ -51,15 +49,35 @@ def buy_stock(id, ticker, qty, close, comp):
 @click.argument("id")
 @click.command()
 def sell_stock(id, ticker, qty, close):
-    """Sell qty shares of ticker """
+    """Sell qty shares of ticker"""
     portfolio = ps.Portfolio.load(id)
     at = "close" if close else "open"
     portfolio.sell_stock(ticker=ticker.upper(), qty=int(qty), at=at)
     portfolio.save()
-    table = _get_ps_table([portfolio])
-    click.echo(table)
+
+
+@click.option("--usd", default=0.00, help="Dollars USD to add")
+@click.argument("id")
+@click.command()
+def deposit(id, usd):
+    """Deposit $USD into the portfolio"""
+    portfolio = ps.Portfolio.load(id)
+    portfolio.deposit(usd)
+    portfolio.save()
+
+
+@click.option("--usd", default=0.00, help="Dollars USD to add")
+@click.argument("id")
+@click.command()
+def withdraw(id, usd):
+    """Withdraw $USD from the portfolio"""
+    portfolio = ps.Portfolio.load(id)
+    portfolio.withdraw(usd)
+    portfolio.save()
 
 
 tx.add_command(_list)
 tx.add_command(buy_stock)
 tx.add_command(sell_stock)
+tx.add_command(deposit)
+tx.add_command(withdraw)

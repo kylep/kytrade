@@ -1,8 +1,12 @@
 # KyTrade
 
-Some python-based trading & investing tools I'm writing for myself. This is open-source because I
-open-source basically everything. I've learned a ton from other people's open-source projects.
-It would be unwise to use this software without speaking with me first. - Kyle
+Some python-based trading & investing tools .
+
+
+This is open-source because I open-source basically everything and because I've learned a ton from
+other people's open-source projects. It would be unwise to use this software without speaking with
+me first.
+- Kyle
 
 
 ## Status
@@ -16,6 +20,7 @@ It would be unwise to use this software without speaking with me first. - Kyle
 - Dividends are not yet factored in so everything will seem worse, particularly high-dividend
   positions.
 - I'm thinking about writing a simple web UI to display charts and such, have not started it
+
 
 ---
 
@@ -57,7 +62,7 @@ ARCHFLAGS="-arch x86_64" pip install -e .
 
 [*install docker*](https://docs.docker.com/get-docker/)
 
-Start a local database usind Docker:
+Start a local database using Docker:
 ```
 bin/start-new-database.sh
 ```
@@ -79,7 +84,7 @@ export SQL_DATABASE="trade"
 # Usage
 
 
-Show that it's installed correctly:
+Show that the CLI is installed correctly:
 ```
 kt version
 kt
@@ -92,7 +97,7 @@ Initialize the database by creating the tables
 kt init database-tables
 ```
 
-Save up to 20 yrs of history for a given ticker to the local db - example SPY
+Save up to 20 yrs of history for a given ticker to the database - example SPY
 ```
 kt download daily-stock-prices SPY
 ```

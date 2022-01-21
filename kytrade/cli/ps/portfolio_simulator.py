@@ -10,7 +10,7 @@ def _get_ps_table(portfolios: list):
     """Print a list of portfolios"""
     table = BeautifulTable(maxwidth=120)
     table.set_style(BeautifulTable.STYLE_MARKDOWN)
-    headers = ["id", "name", "opened", "date", "balance", "num_tx", "tx_profit", "positions"]
+    headers = ["id", "name", "opened", "date", "cash", "num_tx", "total", "positions", "profit"]
     for portfolio in portfolios:
         positions = ", ".join([f"{pos.ticker}({pos.qty})" for pos in portfolio.stock_positions])
         num_transactions = len(portfolio.stock_transactions)
@@ -21,8 +21,9 @@ def _get_ps_table(portfolios: list):
             str(portfolio.date),
             f"{portfolio.balance:.2f}",
             num_transactions,
-            f"{portfolio.tx_profit:.2f}",
+            f"{portfolio.value_at_close:.2f}",
             positions,
+            f"{portfolio.profit:.2f}"
         ]
         table.rows.append(row)
     table.columns.header = headers
@@ -67,18 +68,6 @@ def delete(id):
     click.echo(f"Done")
 
 
-@click.option("--usd", default=0.00, help="Dollars USD to add")
-@click.argument("id")
-@click.command()
-def add_funds(id, usd):
-    """Add $USD to the portfolio"""
-    portfolio = ps.Portfolio.load(id)
-    portfolio.balance += usd
-    portfolio.save()
-    table = _get_ps_table([portfolio])
-    click.echo(table)
-
-
 @click.option("--to-date", "-d", required=False, default=None, help="Advance to date YYYY-MM-DD")
 @click.argument("id")
 @click.command()
@@ -89,18 +78,12 @@ def advance(id, to_date):
         portfolio.advance_to_date(to_date)
     else:
         portfolio.advance_one_day()
-    table = _get_ps_table([portfolio])
-    click.echo(table)
     portfolio.save()
-
-
-
 
 
 portfolio_simulator.add_command(create)
 portfolio_simulator.add_command(_list)
 portfolio_simulator.add_command(details)
 portfolio_simulator.add_command(delete)
-portfolio_simulator.add_command(add_funds)
 portfolio_simulator.add_command(advance)
 portfolio_simulator.add_command(tx)

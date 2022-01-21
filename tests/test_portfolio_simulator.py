@@ -110,20 +110,36 @@ def test_portfolio_buy_sell_stock(mock_session, mock_daily_stock_price):
     assert portsim.balance == new_balance
     # the transaction should show that it was a BUY and link to the id of the stock position
     assert portsim.stock_transactions[0].action == "BUY"
-    assert portsim.stock_transactions[0].position_id == portsim.stock_positions[0].id
+    assert portsim.stock_transactions[0].portfolio_id == portsim.id
+    assert portsim.stock_transactions[0].ticker == "FOO"
     portsim.buy_stock(ticker="FOO", qty=buy_qty, at="open")  # mocked from mock_daily_stock_price
     # new stock positions should only be made for new shares
     assert len(portsim.stock_positions) == 1
     # new transactions made for each buy
     assert len(portsim.stock_transactions) == 2
     # list ordering is ok
-    assert portsim.stock_transactions[1].position_id == portsim.stock_positions[0].id
+    assert portsim.stock_transactions[1].portfolio_id == portsim.id
     with pytest.raises(portfolio_simulator.InsufficientFundsError):
         portsim.buy_stock(ticker="FOO", qty=9999, at="open")  # mocked from mock_daily_stock_price
     with pytest.raises(portfolio_simulator.InsufficientSharesError):
         portsim.sell_stock("FOO", 9999, at="close")
 
 
-
-
-
+def test_deposit_withdraw(mock_session):
+    portsim = portfolio_simulator.Portfolio(name="TEST", date="2000-01-01")
+    assert len(portsim.orm_cash_operations) == 0
+    # deposit cash
+    deposit = 500.50
+    portsim.deposit(deposit)
+    assert len(portsim.orm_cash_operations) == 1
+    assert portsim.orm_cash_operations[0].usd == deposit
+    assert portsim.orm_cash_operations[0].action == "DEPOSIT"
+    assert portsim.orm_cash_operations[0].portfolio_id == portsim.id
+    assert portsim.balance == deposit
+    # withdraw cash
+    withdraw = 100.50
+    portsim.withdraw(withdraw)
+    assert len(portsim.orm_cash_operations) == 2
+    assert portsim.orm_cash_operations[1].usd == withdraw
+    assert portsim.orm_cash_operations[1].action == "WITHDRAW"
+    assert portsim.balance == deposit - withdraw

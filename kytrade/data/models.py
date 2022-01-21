@@ -64,12 +64,13 @@ class PortSimCashOperation(Base):
     """
     # Really gotta figure out enums at some point...
     __tablename__ = "portfolio_simulator_cash_operations"
-    __table_args__ = (UniqueConstraint("portfolio_id", "date", name='portfolio_date'),)
     id = Column(Integer, primary_key=True)
     portfolio_id = Column(Integer)
     date = Column(Date)
     action = Column(String(8))  # DEPOSIT or WITHDRAW
-    usd = Column(float)
+    usd = Column(Float)
+    def __repr__(self):
+        return _gen_repr(self)
 
 
 class PortfolioSimulatorValueHistoryDay(Base):

@@ -30,7 +30,7 @@ class Portfolio:
         self.orm_stock_positions = []  # list of PortSimStockPosition objects
         self.orm_stock_transactions = []  # list of PortSimStockTransaction objects
         self.orm_cash_operations = []  # list of PortSimCashOperation objects
-        self.ps_balance_history = []  # list of PortfolioSimulatorBalanceHistoryDay objects
+        self.orm_balance_history = []  # list of PortfolioSimulatorBalanceHistoryDay objects
         self.on_open = []  # list of Strategy's to execute on market open
         self.on_close = []  # ...to execute on market close
 
@@ -51,6 +51,16 @@ class Portfolio:
         return instance
 
     @property
+    def orm_objects(self):
+        """Return a list of all the ORM objects associated with this portsim"""
+        return (
+            self.orm_stock_positions
+            + self.orm_stock_transactions
+            + self.orm_cash_operations
+            + self.orm_balance_history
+        )
+
+    @property
     def balance(self):
         """in usd"""
         return self.orm_ps.usd
@@ -58,26 +68,24 @@ class Portfolio:
     @balance.setter
     def balance(self, value):
         """Set the portfolio balance - raise InsufficientFundsError if negative"""
-        # Reminder: When implementing logging, log changes to balance
-        delta = value - self.orm_ps.usd  # have 100, set value to 110, detla is +10
-        if delta == 0:
-            return  # no op
-        action = "DEPOSIT" if delta > 0 else "WITHDRAW"
-        cash_operation = models.PortSimCashOperation(
-            portfolio_id=self.id, date=self.date, action=action, usd=value
-        )
-        self.orm_cash_operations.append(cash_operation)
         self.orm_ps.usd = value
         if value < 0:
             raise InsufficientFundsError(f"Portfolio balance {value} is negative")
 
     @property
-    def current_value(self) -> float:
-        """Current sum value of all stocks + balance"""
+    def value_at_close(self) -> float:
+        """Current sum value of all stocks + balance at the end of the day"""
+        cval = self.balance
+        for position in self.orm_stock_transactions:
+            cval += position.qty * daily_stock_price.spot_close_price(position.ticker, self.date)
+        return cval
 
     @property
     def profit(self) -> float:
         """current sum value of all stocks + balance - deposited funds"""
+        # find the total amnt deposited
+        deposits = self.orm_cash_operations
+        return 0
 
     @property
     def date(self):
@@ -97,9 +105,6 @@ class Portfolio:
         self.session.add(self.orm_ps)
         self.session.commit()
         self.session.refreshself.orm_ps()
-        if not self.orm_ps.id:
-            # This should never happen, unless...
-            raise Exception("Failed to get ID for portfolio - is auto-increment broken?")
         return self.orm_ps.id
 
     @property
@@ -130,6 +135,17 @@ class Portfolio:
         return self.orm_stock_transactions
 
     @property
+    def cash_operations(self):
+        if not self.orm_cash_operations:
+            query = select(models.PortSimCashOperation).where(
+                models.PortSimCashOperation.portfolio_id == self.id
+            )
+            cash_ops = self.session.execute(query).all()
+            cash_ops = [cash_op[0] for cash_op in cash_ops]  # de-tuppling
+            self.orm_cash_operations += cash_ops
+        return self.orm_cash_operations
+
+    @property
     def tx_profit(self):
         """Profit from all the transactions so far + the value of current positions"""
         tx_profit = 0
@@ -137,6 +153,22 @@ class Portfolio:
             multiplier = 1 if transaction.action == "SELL" else -1  # buy subtracts, sell adds $
             tx_profit += multiplier * transaction.qty * transaction.unit_price
         return tx_profit
+
+    def deposit(self, value):
+        """deposit cash into the portsim"""
+        cash_operation = models.PortSimCashOperation(
+            portfolio_id=self.id, date=self.date, action="DEPOSIT", usd=value
+        )
+        self.orm_cash_operations.append(cash_operation)
+        self.balance += value
+
+    def withdraw(self, value):
+        """withdraw cash from the portsim"""
+        cash_operation = models.PortSimCashOperation(
+            portfolio_id=self.id, date=self.date, action="WITHDRAW", usd=value
+        )
+        self.orm_cash_operations.append(cash_operation)
+        self.balance -= value
 
     def advance_one_day(self):
         """Advance one day"""
@@ -210,26 +242,20 @@ class Portfolio:
 
     def save(self):
         """Save this portfolio instance to the database"""
-        # Save the ps
+        # Save the ps first, can't associate the other orm objects with it otherwise
         self.session.add(self.orm_ps)
         self.session.commit()
         self.session.refresh(self.orm_ps)  # Refresh the portfolio ID
         # Save each transaction - make sure they link to this portfolio
-        # TODO: change the tx schema to track ticker and portfolio ID instead of position ID
-        for record in (
-            self.orm_stock_positions + self.orm_stock_transactions + self.orm_cash_operations
-        ):
+        for record in self.orm_objects:
             record.portfolio_id = self.id  # TODO: I don't think I need this any more...
             self.session.add(record)
         self.session.commit()
 
     def delete(self):
         """Delete this portfolio simulator instance"""
-        # don't forget self.ps_balance_history once implemented
-        for stock_transaction in self.orm_stock_transactions:
-            self.session.delete(stock_transaction)
-        for stock_position in self.orm_stock_positions:
-            self.session.delete(stock_position)
+        for record in self.orm_objects:
+            self.session.delete(record)
         self.session.delete(self.orm_ps)
         self.session.commit()
 

@@ -1,10 +1,23 @@
 # KyTrade
 
-Some python-based trading & investing tools.
+Some python-based trading & investing tools I'm writing for myself. This is open-source because I
+open-source basically everything. I've learned a ton from other people's open-source projects.
+It would be unwise to use this software without speaking with me first. - Kyle
 
-*Status*:
-Right now I'm trying to find some alpha, or at least beta,
-using exclusively actions at open and close.
+
+## Status
+
+- The command-line basically works, though the historical data could be improved.
+- Right now this will exclusively simulate purchase/sale executions at open and close.
+- This version only tracks stock markets, no forex/bonds/crypto/futures.
+- Currently only uses daily data, no inter-day information.
+- I'm not paying for the alphavantage subscription so any tickers that have had splits will be
+  incorrect.
+- Dividends are not yet factored in so everything will seem worse, particularly high-dividend
+  positions.
+- I'm thinking about writing a simple web UI to display charts and such, have not started it
+
+---
 
 
 # Installation

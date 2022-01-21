@@ -29,6 +29,7 @@ class Portfolio:
         self.orm_ps = ps  # The DB portfolio_simulators row in ObjectRelationalModel format
         self.orm_stock_positions = []  # list of PortSimStockPosition objects
         self.orm_stock_transactions = []  # list of PortSimStockTransaction objects
+        self.orm_cash_operations = []  # list of PortSimCashOperation objects
         self.ps_balance_history = []  # list of PortfolioSimulatorBalanceHistoryDay objects
         self.on_open = []  # list of Strategy's to execute on market open
         self.on_close = []  # ...to execute on market close
@@ -58,9 +59,25 @@ class Portfolio:
     def balance(self, value):
         """Set the portfolio balance - raise InsufficientFundsError if negative"""
         # Reminder: When implementing logging, log changes to balance
+        delta = value - self.orm_ps.usd  # have 100, set value to 110, detla is +10
+        if delta == 0:
+            return  # no op
+        action = "DEPOSIT" if delta > 0 else "WITHDRAW"
+        cash_operation = models.PortSimCashOperation(
+            portfolio_id=self.id, date=self.date, action=action, usd=value
+        )
+        self.orm_cash_operations.append(cash_operation)
         self.orm_ps.usd = value
         if value < 0:
             raise InsufficientFundsError(f"Portfolio balance {value} is negative")
+
+    @property
+    def current_value(self) -> float:
+        """Current sum value of all stocks + balance"""
+
+    @property
+    def profit(self) -> float:
+        """current sum value of all stocks + balance - deposited funds"""
 
     @property
     def date(self):
@@ -124,7 +141,6 @@ class Portfolio:
     def advance_one_day(self):
         """Advance one day"""
         self.orm_ps.date += datetime.timedelta(days=1)
-        print(f"{self.orm_ps.name} advanced to {self.orm_ps.date}")
 
     def advance_to_date(self, date: str = None):
         """Advance the date one day, or to the given date YYYY-MM-DD"""
@@ -157,7 +173,7 @@ class Portfolio:
         action: BUY or SELL
         """
         transaction = models.PortSimStockTransaction(
-            portfolio_id = self.id,
+            portfolio_id=self.id,
             ticker=ticker,
             date=self.date,
             qty=qty,
@@ -200,8 +216,10 @@ class Portfolio:
         self.session.refresh(self.orm_ps)  # Refresh the portfolio ID
         # Save each transaction - make sure they link to this portfolio
         # TODO: change the tx schema to track ticker and portfolio ID instead of position ID
-        for record in self.orm_stock_positions + self.orm_stock_transactions:
-            record.portfolio_id = self.id
+        for record in (
+            self.orm_stock_positions + self.orm_stock_transactions + self.orm_cash_operations
+        ):
+            record.portfolio_id = self.id  # TODO: I don't think I need this any more...
             self.session.add(record)
         self.session.commit()
 

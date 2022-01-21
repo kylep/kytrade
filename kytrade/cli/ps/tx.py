@@ -28,6 +28,7 @@ def _list(id):
     table.rows.append(["-"]*5+[running_total])
     click.echo(table)
 
+
 @click.option("--comp/--no-comp", default=False, help="--comp for free shares")
 @click.option("--close/--open", default=False, help="buy at open or close - default: open")
 @click.option("--qty", "-n", required=True, help="Qty to buy")

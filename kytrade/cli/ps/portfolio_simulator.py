@@ -79,10 +79,28 @@ def add_funds(id, usd):
     click.echo(table)
 
 
+@click.option("--to-date", "-d", required=False, default=None, help="Advance to date YYYY-MM-DD")
+@click.argument("id")
+@click.command()
+def advance(id, to_date):
+    """Advance the ps 1 day or to --to-date"""
+    portfolio = ps.Portfolio.load(id)
+    if to_date:
+        portfolio.advance_to_date(to_date)
+    else:
+        portfolio.advance_one_day()
+    table = _get_ps_table([portfolio])
+    click.echo(table)
+    portfolio.save()
+
+
+
+
 
 portfolio_simulator.add_command(create)
 portfolio_simulator.add_command(_list)
 portfolio_simulator.add_command(details)
 portfolio_simulator.add_command(delete)
 portfolio_simulator.add_command(add_funds)
+portfolio_simulator.add_command(advance)
 portfolio_simulator.add_command(tx)

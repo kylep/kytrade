@@ -58,13 +58,28 @@ class PortfolioSimulator(Base):
         return _gen_repr(self)
 
 
-class PortfolioSimulatorBalanceHistoryDay(Base):
+class PortSimCashOperation(Base):
+    """Track depositing/withdrawing funds from the portfolio
+       action: DEPOSIT/WITHDRAW
+    """
+    # Really gotta figure out enums at some point...
+    __tablename__ = "portfolio_simulator_cash_operations"
+    __table_args__ = (UniqueConstraint("portfolio_id", "date", name='portfolio_date'),)
+    id = Column(Integer, primary_key=True)
+    portfolio_id = Column(Integer)
+    date = Column(Date)
+    action = Column(String(8))  # DEPOSIT or WITHDRAW
+    usd = Column(float)
+
+
+class PortfolioSimulatorValueHistoryDay(Base):
     """Portfilio Simulator Balance on a given day"""
     __tablename__ = "portfolio_simulator_balance_history_days"
     id = Column(Integer, primary_key=True)
     portfolio_id = Column(Integer)
     date = Column(Date)
-    usd = Column(Float)
+    total_usd = Column(Float)
+    profit_usd = Column(Float)
     def __repr__(self):
         return _gen_repr(self)
 

@@ -29,8 +29,3 @@ def get_daily_stock_prices(ticker: str, compact=False) -> list:
         orm_instance.volume = values["5. volume"]
         orm_instances.append(orm_instance)
     return orm_instances
-    # df = DataFrame(df)
-    # # fix the pandas columns to remove numeric prefixes: "1. open" -> "open"
-    # df_cols = [i.split(" ")[1] for i in df.columns]
-    # df.columns = df_cols
-    # return (df, metadata)

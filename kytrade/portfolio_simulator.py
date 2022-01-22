@@ -36,7 +36,7 @@ class Portfolio:
 
     @staticmethod
     def load(name_or_id):
-        """Load a Portfolio gtom the db by id and return its portfolio simulator object"""
+        """Load a Portfolio from the db by id and return its portfolio simulator object"""
         session = get_session()
         query = select(models.PortfolioSimulator).where(
             or_(
@@ -84,8 +84,13 @@ class Portfolio:
     def profit(self) -> float:
         """current sum value of all stocks + balance - deposited funds"""
         # find the total amnt deposited
-        deposits = self.orm_cash_operations
-        return 0
+        cash_op_delta = 0
+        for cash_op in self.cash_operations:
+            # if you have withdrawn money, consider it earned
+            # if you have added money, it is not profit
+            multiplier = -1 if cash_op.action == "DEPOSIT" else 1
+            cash_op_delta += multiplier * cash_op.usd
+        return self.value_at_close + cash_op_delta
 
     @property
     def date(self):
@@ -104,7 +109,7 @@ class Portfolio:
             return self.orm_ps.id
         self.session.add(self.orm_ps)
         self.session.commit()
-        self.session.refreshself.orm_ps()
+        self.session.refresh(self.orm_ps)
         return self.orm_ps.id
 
     @property

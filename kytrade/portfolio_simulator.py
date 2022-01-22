@@ -76,7 +76,7 @@ class Portfolio:
     def value_at_close(self) -> float:
         """Current sum value of all stocks + balance at the end of the day"""
         cval = self.balance
-        for position in self.orm_stock_transactions:
+        for position in self.stock_transactions:
             cval += position.qty * daily_stock_price.spot_close_price(position.ticker, self.date)
         return cval
 
@@ -229,7 +229,7 @@ class Portfolio:
         price = price if price else getattr(dsp, at)
         total_price = price * qty
         if comp:
-            self.balance += total_price
+            self.deposit(total_price)
         self.balance -= total_price
         self.add_stock(ticker, qty)
         self.log_transaction(ticker=ticker, qty=qty, unit_price=price, action="BUY")

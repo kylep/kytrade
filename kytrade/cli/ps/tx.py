@@ -30,7 +30,7 @@ def _list(id):
 
 
 @click.option("--comp/--no-comp", default=False, help="--comp for free shares")
-@click.option("--close/--open", default=False, help="buy at open or close - default: open")
+@click.option("--close/--open", default=True, help="buy at open or close - default: close")
 @click.option("--qty", "-n", required=True, help="Qty to buy")
 @click.option("--ticker", "-t", required=True, help="Stock ticker")
 @click.argument("id")

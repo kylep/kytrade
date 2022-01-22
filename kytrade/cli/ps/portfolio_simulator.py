@@ -10,17 +10,15 @@ def _get_ps_table(portfolios: list):
     """Print a list of portfolios"""
     table = BeautifulTable(maxwidth=120)
     table.set_style(BeautifulTable.STYLE_MARKDOWN)
-    headers = ["id", "name", "opened", "date", "cash", "num_tx", "total", "positions", "profit"]
+    headers = ["id", "name", "opened", "date", "cash", "mkt.val", "positions", "profit"]
     for portfolio in portfolios:
         positions = ", ".join([f"{pos.ticker}({pos.qty})" for pos in portfolio.stock_positions])
-        num_transactions = len(portfolio.stock_transactions)
         row = [
             portfolio.id,
             portfolio.name,
             str(portfolio.orm_ps.opened),
             str(portfolio.date),
             f"{portfolio.balance:.2f}",
-            num_transactions,
             f"{portfolio.value_at_close:.2f}",
             positions,
             f"{portfolio.profit:.2f}"

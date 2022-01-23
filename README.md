@@ -1,25 +1,56 @@
 # KyTrade
 
-Some python-based trading & investing tools .
+_A daily stock portfolio simulator for backtesting TA strategies_
 
 
-This is open-source because I open-source basically everything and because I've learned a ton from
-other people's open-source projects. It would be unwise to use this software without speaking with
-me first.
-- Kyle
+
+> While this is open-source, understand that it is experimental.
+  *It would be unwise to use this software without speaking to me first.* --  Kyl
 
 
-## Status
+---
 
-- The command-line basically works, though the historical data could be improved.
-- Right now this will exclusively simulate purchase/sale executions at open and close.
-- This version only tracks stock markets, no forex/bonds/crypto/futures.
-- Currently only uses daily data, no inter-day information.
-- I'm not paying for the alphavantage subscription so any tickers that have had splits will be
-  incorrect.
-- Dividends are not yet factored in so everything will seem worse, particularly high-dividend
-  positions.
-- I'm thinking about writing a simple web UI to display charts and such, have not started it
+
+# Demo
+
+This demo shows the PortSim simulating a Buy-and-Hold strategy for QQQ, a NASDAQ 100 Index ETF.
+
+ - The simulation runs from the dates of 2010-01-01 to 2020-01-01.
+ - The initial 100 shares of QQQ are added using `--comp` to execute a deposit of their exact
+   value to the portfolio when buying them. They are purchased at market close.
+ - The date is advanced.
+   - Automatic operations (Strategies) can execute each day at the open and close of the market.
+     (*not implemented yet*)
+   - In this scenario no Strategies are employed. The days pass without touching the portfolio.
+ - A summary of the actions taken over that time is printed. In this scenario, not much.
+ - A CSV file is generated so you can generate tables in Excel
+
+```
+kt download daily-stock-prices QQQ
+kt ps create qqq-bah --date 2010-01-01
+kt ps list
+tx buy-stock qqq-bah --ticker QQQ --qty 100 --close --compt init database-tables
+kt ps tx list qqq-bah
+kt ps advance qqq-bah --to-date 2020-01-01
+mkdir -p output
+kt ps balance-history --csv qqq-bah | tee output/qqq-bah-2010-01-01-to-2020-01-01.csv
+```
+
+
+
+---
+
+
+
+# Status
+
+- The command-line is functional
+- Advancing detween days works and the balance history is logged using daily stock data
+- daily open/close Stategies are not implemented
+- Dividends and splits aren't included in the alphavantage free data. Performance will appear
+  worse until I pay them...
+- Web UI / chart generation not started
+- Simulation speed is way too slow, will implement lazy loading and pre-caching next
 
 
 ---
@@ -29,6 +60,7 @@ me first.
 
 This procedure is written on a MacBook but it should work anywhere that Docker can run with only
 minor differences (such as with installing the MySQL client packages).
+
 
 ## Python package & CLI
 
@@ -56,6 +88,7 @@ virtualenv --python=python3 env/
 ARCHFLAGS="-arch x86_64" pip install -e .
 ```
 
+
 ## Database
 
 ### Local Database
@@ -78,17 +111,20 @@ export SQL_PASS="FooBarBaz"
 export SQL_DATABASE="trade"
 ```
 
+
 ---
 
 
-# Usage
 
+# Usage
 
 Show that the CLI is installed correctly:
 ```
 kt version
 kt
 ```
+
+
 
 ## Setup
 

@@ -170,7 +170,7 @@ kt ps tx deposit [PS ID] --usd [QTY]
 
 You can also simulate withdrawing money, for example in a retirement scenario
 ```
-kt ps tx withdraw [PS ID] -- usd [QTY]
+kt ps tx withdraw [PS ID] --usd [QTY]
 ```
 
 Buy some shares - see `--help` for shorthand options

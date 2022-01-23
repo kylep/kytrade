@@ -1,4 +1,5 @@
 export.sh
+.DS_Store
 env/
 **egg-info
 db-data/
@@ -8,3 +9,4 @@ database/
 htmlcov/
 .coverage
 build/
+output/

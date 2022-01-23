@@ -169,18 +169,17 @@ class Portfolio:
 
     def _update_balance_history(self):
         """Save today's balance"""
-        entry = PortfolioSimulatorValueHistoryDay(
+        day = models.PortfolioSimulatorValueHistoryDay(
             portfolio_id = self.id,
             date = self.date,
             total_usd = self.value_at_close,
             profit_usd = self.profit
         )
-        self.orm_balance_history.append(entry)
-
+        self.orm_balance_history.append(day)
 
     def advance_one_day(self):
         """Advance one day"""
-        self.update_balance_history()
+        self._update_balance_history()
         self.orm_ps.date += datetime.timedelta(days=1)
 
     def advance_to_date(self, date: str = None):

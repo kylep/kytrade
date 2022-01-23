@@ -5,7 +5,7 @@ _A daily stock portfolio simulator for backtesting TA strategies_
 
 
 > While this is open-source, understand that it is experimental.
-  *It would be unwise to use this software without speaking to me first.* --  Kyl
+  *It would be unwise to use this software without speaking to me first.* --  Kyle
 
 
 ---

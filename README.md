@@ -29,7 +29,7 @@ This demo shows the PortSim simulating a Buy-and-Hold strategy for QQQ, a NASDAQ
 kt download daily-stock-prices QQQ
 kt ps create qqq-bah --date 2010-01-01
 kt ps list
-tx buy-stock qqq-bah --ticker QQQ --qty 100 --close --compt init database-tables
+kt tx buy-stock qqq-bah --ticker QQQ --qty 100 --close --compt init database-tables
 kt ps tx list qqq-bah
 kt ps advance qqq-bah --to-date 2020-01-01
 mkdir -p output

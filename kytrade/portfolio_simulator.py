@@ -112,43 +112,35 @@ class Portfolio:
         self.session.refresh(self.orm_ps)
         return self.orm_ps.id
 
+    def _load_orm_prop(self, model, orm_list: list):
+        """Populate the ORM properies of the given model associated with this portfolio"""
+        if not orm_list:
+            query = select(model).where(
+                model.portfolio_id == self.id
+            )
+            rows = self.session.execute(query).all()  # returns a list of tupples (<data>,)
+            # orm_list is passed by reference so this updates self.orm_<orm_list>
+            orm_list += [row[0] for row in rows]  # de-tuppling
+        return orm_list
+
     @property
     def stock_positions(self):
         """Get the stock positions - read from DB on first query"""
-        if not self.orm_stock_positions:
-            query = select(models.PortSimStockPosition).where(
-                models.PortSimStockPosition.portfolio_id == self.id
-            )
-            positions = self.session.execute(query).all()  # returns a list of tupples (<data>,)
-            self.orm_stock_positions = [pos[0] for pos in positions]  # de-tuppling
-        return self.orm_stock_positions
+        return self._load_orm_prop(models.PortSimStockPosition, self.orm_stock_positions)
 
     @property
     def stock_transactions(self):
         """List of PortSimStockTransaction orm objects"""
-        if not self.orm_stock_transactions:
-            # Note: I had been using position_id here and not saving the ticker in the transactions
-            # but the ID wasn't getting generated in time to be useful. If I used UUIDs that would
-            # fix this problem, or I could just save json strings with each portfolio
-            # ...thinking on it
-            query = select(models.PortSimStockTransaction).where(
-                models.PortSimStockTransaction.portfolio_id == self.id
-            )
-            transactions = self.session.execute(query).all()
-            transactions = [tx[0] for tx in transactions]  # de-tuppling
-            self.orm_stock_transactions += transactions
-        return self.orm_stock_transactions
+        return self._load_orm_prop(models.PortSimStockTransaction, self.orm_stock_transactions)
 
     @property
     def cash_operations(self):
-        if not self.orm_cash_operations:
-            query = select(models.PortSimCashOperation).where(
-                models.PortSimCashOperation.portfolio_id == self.id
-            )
-            cash_ops = self.session.execute(query).all()
-            cash_ops = [cash_op[0] for cash_op in cash_ops]  # de-tuppling
-            self.orm_cash_operations += cash_ops
-        return self.orm_cash_operations
+        """List of PortSimCashOperation objects"""
+        return self._load_orm_prop(models.PortSimCashOperation, self.orm_cash_operations)
+
+    @property
+    def balance_history(self):
+        return self._load_orm_prop(models.PortfolioSimulatorValueHistoryDay, self.orm_balance_history)
 
     @property
     def tx_profit(self):
@@ -175,8 +167,20 @@ class Portfolio:
         self.orm_cash_operations.append(cash_operation)
         self.balance -= value
 
+    def _update_balance_history(self):
+        """Save today's balance"""
+        entry = PortfolioSimulatorValueHistoryDay(
+            portfolio_id = self.id,
+            date = self.date,
+            total_usd = self.value_at_close,
+            profit_usd = self.profit
+        )
+        self.orm_balance_history.append(entry)
+
+
     def advance_one_day(self):
         """Advance one day"""
+        self.update_balance_history()
         self.orm_ps.date += datetime.timedelta(days=1)
 
     def advance_to_date(self, date: str = None):
@@ -263,6 +267,10 @@ class Portfolio:
             self.session.delete(record)
         self.session.delete(self.orm_ps)
         self.session.commit()
+
+    def __repr__(self):
+        """Print representation of this object"""
+        return f"{self.__class__.__name__}(name='{self.name}', date='{self.date}')"
 
 
 def list_portfolios() -> list:

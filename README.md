@@ -129,27 +129,59 @@ kt ps delete [ID]
 Add some funds to the portfolio simulator.
 `[PS ID]` refers to the name or id of the portfolio simulator.
 ```
-kt ps add-funds [PS ID] --usd [DOLLARS]
+kt ps tx deposit [PS ID] --usd [QTY]
 ```
 
-Buy some shares - see `--help` for shorthand options:
+You can also simulate withdrawing money, for example in a retirement scenario
+```
+kt ps tx withdraw [PS ID] -- usd [QTY]
+```
+
+Buy some shares - see `--help` for shorthand options
 ```
 kt ps tx buy-stock [PS ID] --ticker [TICKER] --qty [QUANTITY] [--open/--close] [--comp/--no-comp]
 ```
 
-Sell some shares:
+Sell some shares
 ```
 kt ps tx sell-stock [PS ID] --ticker [TICKER] --qty [QUANTITY] [--open/--close]
 ```
 
-List the trasactions of a portfolio:
+List the trasactions of a portfolio including buys, sells, deposits and withdrawls
 ```
 kt ps tx list [PS ID]
 ```
 
+Simulate advancing time by one day. Each day, trading strategies are applied. Once "at open" then
+again "at close" using the associated prices. A new balance history entry is created for each day.
+
+```
+kt ps advance [PS ID]
+```
+
+Advance time to a specific date
+```
+kt ps advance [PS ID] -d [YYYY-MM-DD]
+```
+
+Print the value of the portfolio over time
+```
+kt ps balance-history[PS ID]
+```
+
+To create charts from the data, currently the easiest approach is to export the balance history to
+a CSV file then generate one with Excel or another spreadsheet and charting tool.
+
+The `balance-history` command has an optional `--csv` argument, which combined with piping the
+output to a file can create your csv
+```
+mkdir output/
+kt ps balance-history[PS ID] --csv > output/my_portfolio.csv
+```
 
 
-## Displaying saved data
+
+## Displaying market data
 
 Show historical values. Ensure you've downloaded that ticker first.
 This is only really useful if you pipe it to a file or want to see limited data.

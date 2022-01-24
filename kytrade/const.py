@@ -2,6 +2,7 @@
 import os
 import sys
 
+
 def env_var(env_var_name, default, required=False):
     """Return an environment variable if it exists else a default"""
     if required and env_var_name not in os.environ:
@@ -20,7 +21,7 @@ VERSION = "1.0001"
 ALPHAVANTAGE_API_KEY = env_var("ALPHAVANTAGE_API_KEY", None, required=True)
 SQLA_DRIVER = env_var("SQLA_DRIVER", "mysql")
 SQLA_ECHO = env_var("SQLA_ECHO", False)
-SQL_HOST = env_var("SQL_HOST","127.0.0.1")
+SQL_HOST = env_var("SQL_HOST", "127.0.0.1")
 SQL_PORT = env_var("SQL_PORT", 3306)
 SQL_USER = env_var("SQL_USER", "root")
 SQL_PASS = env_var("SQL_PASS", None, required=True)

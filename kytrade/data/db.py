@@ -17,7 +17,7 @@ engine = sqlalchemy.create_engine(
         f"/{const.SQL_DATABASE}"
     ),
     echo=const.SQLA_ECHO,
-    future=False
+    future=False,
 )
 
 

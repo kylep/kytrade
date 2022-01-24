@@ -13,6 +13,10 @@ _A daily stock portfolio simulator for backtesting TA strategies_
 
 # Demo
 
+## 1. Buy and Hold QQQ
+
+This demo can be executed interactively, or by running `bin/demos/1_bah_qqq.sh`
+
 This demo shows the PortSim simulating a Buy-and-Hold strategy for QQQ, a NASDAQ 100 Index ETF.
 
  - The simulation runs from the dates of 2010-01-01 to 2020-01-01.
@@ -26,14 +30,15 @@ This demo shows the PortSim simulating a Buy-and-Hold strategy for QQQ, a NASDAQ
  - A CSV file is generated so you can generate tables in Excel
 
 ```
+kt init database-tables
 kt download daily-stock-prices QQQ
 kt ps create qqq-bah --date 2010-01-01
 kt ps list
-kt tx buy-stock qqq-bah --ticker QQQ --qty 100 --close --compt init database-tables
+kt ps tx buy-stock qqq-bah --ticker QQQ --qty 100 --close --comp
 kt ps tx list qqq-bah
 kt ps advance qqq-bah --to-date 2020-01-01
 mkdir -p output
-kt ps balance-history --csv qqq-bah | tee output/qqq-bah-2010-01-01-to-2020-01-01.csv
+kt ps value-history --csv qqq-bah | tee output/qqq-bah-2010-01-01-to-2020-01-01.csv
 ```
 
 
@@ -45,12 +50,12 @@ kt ps balance-history --csv qqq-bah | tee output/qqq-bah-2010-01-01-to-2020-01-0
 # Status
 
 - The command-line is functional
-- Advancing detween days works and the balance history is logged using daily stock data
+- Advancing detween days works and the value history is logged using daily stock data
 - daily open/close Stategies are not implemented
 - Dividends and splits aren't included in the alphavantage free data. Performance will appear
   worse until I pay them...
 - Web UI / chart generation not started
-- Simulation speed is way too slow, will implement lazy loading and pre-caching next
+- Simulation speed is much improved, simulating ~20yrs takes ~50s. Could still be faster.
 
 
 ---
@@ -189,7 +194,7 @@ kt ps tx list [PS ID]
 ```
 
 Simulate advancing time by one day. Each day, trading strategies are applied. Once "at open" then
-again "at close" using the associated prices. A new balance history entry is created for each day.
+again "at close" using the associated prices. A new value history entry is created for each day.
 
 ```
 kt ps advance [PS ID]
@@ -202,13 +207,13 @@ kt ps advance [PS ID] -d [YYYY-MM-DD]
 
 Print the value of the portfolio over time
 ```
-kt ps balance-history[PS ID]
+kt ps value-history[PS ID]
 ```
 
-To create charts from the data, currently the easiest approach is to export the balance history to
+To create charts from the data, currently the easiest approach is to export the value history to
 a CSV file then generate one with Excel or another spreadsheet and charting tool.
 
-The `balance-history` command has an optional `--csv` argument, which combined with piping the
+The `value-history` command has an optional `--csv` argument, which combined with piping the
 output to a file can create your csv
 ```
 mkdir output/

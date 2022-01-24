@@ -8,7 +8,7 @@ import sqlalchemy as sqla
 import pandas as pd
 from pandas.core.frame import DataFrame
 
-import kytrade.data.daily_stock_price as dsp
+from kytrade.stock_market import StockMarket
 from kytrade.data import db
 from kytrade.data.models import DailySMA
 
@@ -34,17 +34,12 @@ def calc(df: DataFrame, style: str):
 
 def save(ticker: str, from_date: str, days: int, style: str) -> DataFrame:
     """Save return the SMA to the database for the given date"""
-    prices_df = dsp.fetch(ticker, from_date=from_date, limit=days)
+    market = StockMarket()
+    prices_df = market.get_daily_price(ticker=ticker, from_date=from_date, limit=days)
     if len(prices_df) != days:
         return None  # edge cases, happens on oldest data points from 1999
     value = calc(prices_df, style)
-    sma_df = to_df(
-        ticker=ticker,
-        from_date=from_date,
-        days=days,
-        value=value,
-        style=style
-    )
+    sma_df = to_df(ticker=ticker, from_date=from_date, days=days, value=value, style=style)
     db.save_dataframe(DailySMA, sma_df)
     return sma_df
 

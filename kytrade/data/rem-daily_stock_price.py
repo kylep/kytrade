@@ -11,11 +11,12 @@ from kytrade.data.models import DailyStockPrice
 class StockDataNotFound(Exception):
     """Failed to find expected share data"""
 
+
 def download_daily_stock_prices(ticker) -> None:
     """Save <=20 yrs of TICKER daily data to db"""
     session = get_session()
     daily_stock_prices = alphavantage.get_daily_stock_prices(ticker, compact=False)
-    #for daily_stock_price in daily_stock_prices:
+    # for daily_stock_price in daily_stock_prices:
     #    session.add(daily_stock_price)
     session.bulk_save_objects(daily_stock_prices, update_changed_only=True)
     session.commit()
@@ -36,6 +37,7 @@ def fetch(ticker=None, from_date=None, limit=0) -> list:
         msg = f"Failed to fetch stock prices for {ticker} at {from_date} from the database"
         raise StockDataNotFound(msg)
     return price_data
+
 
 def spot_close_price(ticker: str, date: str) -> float:
     """Return the closing price for the given stock at the given day"""

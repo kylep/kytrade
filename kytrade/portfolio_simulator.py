@@ -4,11 +4,11 @@ from sqlalchemy.exc import NoResultFound
 
 from kytrade.data.db import get_session
 from kytrade.data import models
-from kytrade.data import daily_stock_price
+from kytrade.stock_market import StockMarket
 
 
 class InsufficientFundsError(Exception):
-    """Balance is too low to buy"""
+    """Cash balance is too low to buy"""
 
 
 class InsufficientSharesError(Exception):
@@ -26,11 +26,12 @@ class Portfolio:
         ps.usd = 0
         ps.opened = ps.date
         self.session = get_session()
+        self.market = StockMarket()
         self.orm_ps = ps  # The DB portfolio_simulators row in ObjectRelationalModel format
         self.orm_stock_positions = []  # list of PortSimStockPosition objects
         self.orm_stock_transactions = []  # list of PortSimStockTransaction objects
         self.orm_cash_operations = []  # list of PortSimCashOperation objects
-        self.orm_balance_history = []  # list of PortfolioSimulatorBalanceHistoryDay objects
+        self.orm_value_history = []  # list of PortfolioSimulatorBalanceHistoryDay objects
         self.on_open = []  # list of Strategy's to execute on market open
         self.on_close = []  # ...to execute on market close
 
@@ -57,40 +58,48 @@ class Portfolio:
             self.orm_stock_positions
             + self.orm_stock_transactions
             + self.orm_cash_operations
-            + self.orm_balance_history
+            + self.orm_value_history
         )
 
     @property
-    def balance(self):
+    def cash(self):
         """in usd"""
         return self.orm_ps.usd
 
-    @balance.setter
-    def balance(self, value):
-        """Set the portfolio balance - raise InsufficientFundsError if negative"""
+    @cash.setter
+    def cash(self, value):
+        """Set the portfolio cash - raise InsufficientFundsError if negative"""
         self.orm_ps.usd = value
         if value < 0:
-            raise InsufficientFundsError(f"Portfolio balance {value} is negative")
+            raise InsufficientFundsError(f"Portfolio cash {value} is negative")
 
     @property
     def value_at_close(self) -> float:
-        """Current sum value of all stocks + balance at the end of the day"""
-        cval = self.balance
+        """Current sum value of all stocks + cash at the end of the day"""
+        cval = self.cash
         for position in self.stock_transactions:
-            cval += position.qty * daily_stock_price.spot_close_price(position.ticker, self.date)
+            cval += position.qty * self.market.get_spot(position.ticker, self.date).close
         return cval
 
     @property
+    def total_deposited(self):
+        """Sum of all cash deposits"""
+        return sum([op.usd for op in self.cash_operations if op.action == "DEPOSIT"])
+
+    @property
+    def total_withdrawn(self):
+        """Sum of all cash withdrawls"""
+        return sum([op.usd for op in self.cash_operations if op.action != "DEPOSIT"])
+
+    @property
     def profit(self) -> float:
-        """current sum value of all stocks + balance - deposited funds"""
-        # find the total amnt deposited
-        cash_op_delta = 0
-        for cash_op in self.cash_operations:
-            # if you have withdrawn money, consider it earned
-            # if you have added money, it is not profit
-            multiplier = -1 if cash_op.action == "DEPOSIT" else 1
-            cash_op_delta += multiplier * cash_op.usd
-        return self.value_at_close + cash_op_delta
+        """current dollar profit of this portfolio"""
+        return self.value_at_close + self.total_withdrawn - self.total_deposited
+
+    @property
+    def profit_percent(self) -> float:
+        """Get the profit as a % of investment"""
+        return 0 if not self.total_deposited else self.profit / self.total_deposited * 100
 
     @property
     def date(self):
@@ -115,9 +124,7 @@ class Portfolio:
     def _load_orm_prop(self, model, orm_list: list):
         """Populate the ORM properies of the given model associated with this portfolio"""
         if not orm_list:
-            query = select(model).where(
-                model.portfolio_id == self.id
-            )
+            query = select(model).where(model.portfolio_id == self.id)
             rows = self.session.execute(query).all()  # returns a list of tupples (<data>,)
             # orm_list is passed by reference so this updates self.orm_<orm_list>
             orm_list += [row[0] for row in rows]  # de-tuppling
@@ -139,8 +146,8 @@ class Portfolio:
         return self._load_orm_prop(models.PortSimCashOperation, self.orm_cash_operations)
 
     @property
-    def balance_history(self):
-        return self._load_orm_prop(models.PortfolioSimulatorValueHistoryDay, self.orm_balance_history)
+    def value_history(self):
+        return self._load_orm_prop(models.PortfolioSimulatorValueHistoryDay, self.orm_value_history)
 
     @property
     def tx_profit(self):
@@ -157,7 +164,7 @@ class Portfolio:
             portfolio_id=self.id, date=self.date, action="DEPOSIT", usd=value
         )
         self.orm_cash_operations.append(cash_operation)
-        self.balance += value
+        self.cash += value
 
     def withdraw(self, value):
         """withdraw cash from the portsim"""
@@ -165,21 +172,21 @@ class Portfolio:
             portfolio_id=self.id, date=self.date, action="WITHDRAW", usd=value
         )
         self.orm_cash_operations.append(cash_operation)
-        self.balance -= value
+        self.cash -= value
 
-    def _update_balance_history(self):
-        """Save today's balance"""
+    def _update_value_history(self):
+        """Save today's value to the database"""
         day = models.PortfolioSimulatorValueHistoryDay(
-            portfolio_id = self.id,
-            date = self.date,
-            total_usd = self.value_at_close,
-            profit_usd = self.profit
+            portfolio_id=self.id,
+            date=self.date,
+            total_usd=self.value_at_close,
+            profit_usd=self.profit,
         )
-        self.orm_balance_history.append(day)
+        self.orm_value_history.append(day)
 
     def advance_one_day(self):
         """Advance one day"""
-        self._update_balance_history()
+        self._update_value_history()
         self.orm_ps.date += datetime.timedelta(days=1)
 
     def advance_to_date(self, date: str = None):
@@ -223,29 +230,29 @@ class Portfolio:
         self.orm_stock_transactions.append(transaction)
 
     def buy_stock(self, ticker: str, qty: int, at: str, price=None, comp=False):
-        """Add shares and subtract the cost from the balance - exception if overdrawn
+        """Add shares and subtract the cost from available cash - exception if overdrawn
         at: open, close, price
         price: used instead of open/close when at:price is specified
-        comp: complimentary - add the price to balance before buying
+        comp: complimentary - add the price to cash before buying
         """
-        dsp = daily_stock_price.fetch(ticker, from_date=self.date, limit=1)[0]
-        price = price if price else getattr(dsp, at)
+        spot = self.market.get_spot(ticker, self.date)
+        price = price if price else getattr(spot, at)
         total_price = price * qty
         if comp:
             self.deposit(total_price)
-        self.balance -= total_price
+        self.cash -= total_price
         self.add_stock(ticker, qty)
         self.log_transaction(ticker=ticker, qty=qty, unit_price=price, action="BUY")
 
     def sell_stock(self, ticker: str, qty: int, at: str, price=None):
-        """Sell shares and add the total to the balance - exception if shares are not owned
+        """Sell shares and add the total to the cash - exception if shares are not owned
         at: open, close, price
         price: used instead of open/close when at:price is specified
         """
-        dsp = daily_stock_price.fetch(ticker, from_date=self.date, limit=1)[0]
+        dsp = self.market.get_daily_price(ticker=ticker, from_date=self.date, limit=1)[0]
         price = price if price else getattr(dsp, at)
         self.remove_stock(ticker, qty)
-        self.balance += price * qty
+        self.cash += price * qty
         self.log_transaction(ticker=ticker, qty=qty, unit_price=price, action="SELL")
 
     def save(self):

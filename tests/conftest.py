@@ -5,8 +5,8 @@ import pytest
 @pytest.fixture
 def mock_time_series(mocker):
     """Alphavantage time series API call"""
-    class MockTimeSeries:
 
+    class MockTimeSeries:
         def __init__(self, key):
             pass
 
@@ -17,10 +17,9 @@ def mock_time_series(mocker):
                     "2. high": 22.22,
                     "3. low": 10.10,
                     "4. close": 12.12,
-                    "5. volume": 123123
+                    "5. volume": 123123,
                 }
             }
             return (data, None)
+
     mocker.patch("kytrade.alphavantage.TimeSeries", MockTimeSeries)
-
-

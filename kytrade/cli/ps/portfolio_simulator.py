@@ -88,6 +88,7 @@ def advance(id, to_date):
         portfolio.advance_to_date(to_date)
     else:
         portfolio.advance_one_day()
+    click.echo("Saving...")
     portfolio.save()
 
 

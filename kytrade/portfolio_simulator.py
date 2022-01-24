@@ -256,15 +256,28 @@ class Portfolio:
         self.log_transaction(ticker=ticker, qty=qty, unit_price=price, action="SELL")
 
     def save(self):
-        """Save this portfolio instance to the database"""
+        """Save this portfolio instance to the database
+        According to https://stackoverflow.com/questions/3659142/bulk-insert-with-sqlalchemy-orm,
+        the ORM in general is not exactly great for high-performance. Oops.
+        """
         # Save the ps first, can't associate the other orm objects with it otherwise
         self.session.add(self.orm_ps)
         self.session.commit()
         self.session.refresh(self.orm_ps)  # Refresh the portfolio ID
         # Save each transaction - make sure they link to this portfolio
+        print("updating IDs")
         for record in self.orm_objects:
             record.portfolio_id = self.id  # TODO: I don't think I need this any more...
-            self.session.add(record)
+        #    self.session.add(record)  # This was not performing well ...
+        # If you don't commit after each bulk_save you get a StaleDataError
+        print("Executing save")
+        self.session.bulk_save_objects(self.orm_stock_positions)
+        self.session.commit()
+        self.session.bulk_save_objects(self.orm_stock_transactions)
+        self.session.commit()
+        self.session.bulk_save_objects(self.orm_cash_operations)
+        self.session.commit()
+        self.session.bulk_save_objects(self.orm_value_history)
         self.session.commit()
 
     def delete(self):

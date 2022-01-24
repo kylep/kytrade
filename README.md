@@ -56,6 +56,8 @@ kt ps value-history --csv qqq-bah | tee output/qqq-bah-2010-01-01-to-2020-01-01.
   worse until I pay them...
 - Web UI / chart generation not started
 - Simulation speed is much improved, simulating ~20yrs takes ~50s. Could still be faster.
+  - Pretty sure the inserts of the price data aren't happening in bulk, causing a ton of little
+    INSERTS to slow things way down
 
 
 ---

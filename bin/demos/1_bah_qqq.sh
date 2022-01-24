@@ -3,7 +3,7 @@ set -e
 if [[ ! -d bin/ ]]; then echo "ERROR: Run from checkout base"; exit 1; fi
 kt init database-tables
 kt download daily-stock-prices QQQ
-kt ps create qqq-bah --date 2010-01-01
+kt ps create qqq-bah --date 2000-01-01
 kt ps list
 kt ps tx buy-stock qqq-bah --ticker QQQ --qty 100 --close --comp
 kt ps tx list qqq-bah

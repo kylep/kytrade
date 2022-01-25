@@ -61,6 +61,34 @@ class Portfolio:
             + self.orm_value_history
         )
 
+    def _load_orm_prop(self, model, orm_list: list):
+        """Populate the ORM properies of the given model associated with this portfolio"""
+        if not orm_list:
+            query = select(model).where(model.portfolio_id == self.id)
+            rows = self.session.execute(query).all()  # returns a list of tupples (<data>,)
+            # orm_list is passed by reference so this updates self.orm_<orm_list>
+            orm_list += [row[0] for row in rows]  # de-tuppling
+        return orm_list
+
+    @property
+    def stock_positions(self):
+        """Get the stock positions - read from DB on first query"""
+        return self._load_orm_prop(models.PortSimStockPosition, self.orm_stock_positions)
+
+    @property
+    def stock_transactions(self):
+        """List of PortSimStockTransaction orm objects"""
+        return self._load_orm_prop(models.PortSimStockTransaction, self.orm_stock_transactions)
+
+    @property
+    def cash_operations(self):
+        """List of PortSimCashOperation objects"""
+        return self._load_orm_prop(models.PortSimCashOperation, self.orm_cash_operations)
+
+    @property
+    def value_history(self):
+        return self._load_orm_prop(models.PortfolioSimulatorValueHistoryDay, self.orm_value_history)
+
     @property
     def cash(self):
         """in usd"""
@@ -72,6 +100,31 @@ class Portfolio:
         self.orm_ps.usd = value
         if value < 0:
             raise InsufficientFundsError(f"Portfolio cash {value} is negative")
+
+    @property
+    def date(self):
+        """Get the Portfolio date from the orm"""
+        return self.orm_ps.date
+
+    @property
+    def date_opened(self):
+        """Return date the portfolio was opened"""
+        return self.orm_ps.opened
+
+    @property
+    def name(self):
+        """Get the Portfolio from the orm"""
+        return self.orm_ps.name
+
+    @property
+    def id(self):
+        """Get the portfolio ID - save the portfolio first to generate it if needed"""
+        if self.orm_ps.id:
+            return self.orm_ps.id
+        self.session.add(self.orm_ps)
+        self.session.commit()
+        self.session.refresh(self.orm_ps)
+        return self.orm_ps.id
 
     @property
     def value_at_close(self) -> float:
@@ -100,59 +153,6 @@ class Portfolio:
     def profit_percent(self) -> float:
         """Get the profit as a % of investment"""
         return 0 if not self.total_deposited else self.profit / self.total_deposited * 100
-
-    @property
-    def date(self):
-        """Get the Portfolio date from the orm"""
-        return self.orm_ps.date
-
-    @property
-    def date_opened(self):
-        """Return date the portfolio was opened"""
-        return self.orm_ps.opened
-
-    @property
-    def name(self):
-        """Get the Portfolio from the orm"""
-        return self.orm_ps.name
-
-    @property
-    def id(self):
-        """Get the portfolio ID - save the portfolio first to generate it if needed"""
-        if self.orm_ps.id:
-            return self.orm_ps.id
-        self.session.add(self.orm_ps)
-        self.session.commit()
-        self.session.refresh(self.orm_ps)
-        return self.orm_ps.id
-
-    def _load_orm_prop(self, model, orm_list: list):
-        """Populate the ORM properies of the given model associated with this portfolio"""
-        if not orm_list:
-            query = select(model).where(model.portfolio_id == self.id)
-            rows = self.session.execute(query).all()  # returns a list of tupples (<data>,)
-            # orm_list is passed by reference so this updates self.orm_<orm_list>
-            orm_list += [row[0] for row in rows]  # de-tuppling
-        return orm_list
-
-    @property
-    def stock_positions(self):
-        """Get the stock positions - read from DB on first query"""
-        return self._load_orm_prop(models.PortSimStockPosition, self.orm_stock_positions)
-
-    @property
-    def stock_transactions(self):
-        """List of PortSimStockTransaction orm objects"""
-        return self._load_orm_prop(models.PortSimStockTransaction, self.orm_stock_transactions)
-
-    @property
-    def cash_operations(self):
-        """List of PortSimCashOperation objects"""
-        return self._load_orm_prop(models.PortSimCashOperation, self.orm_cash_operations)
-
-    @property
-    def value_history(self):
-        return self._load_orm_prop(models.PortfolioSimulatorValueHistoryDay, self.orm_value_history)
 
     @property
     def tx_profit(self):

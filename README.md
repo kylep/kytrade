@@ -31,7 +31,6 @@ This demo shows the PortSim simulating a Buy-and-Hold strategy for QQQ, a NASDAQ
 
 ```
 kt init database-tables
-kt download daily-stock-prices QQQ
 kt ps create qqq-bah --date 2010-01-01
 kt ps list
 kt ps tx buy-stock qqq-bah --ticker QQQ --qty 100 --close --comp
@@ -59,7 +58,7 @@ kt ps value-history --csv qqq-bah | tee output/qqq-bah-2010-01-01-to-2020-01-01.
   worse until I pay them...
 - Web UI / chart generation not started
 - Simulation speed is much improved, simulating ~20yrs takes ~50s. Could still be faster.
-  - Database actions are all bulked out and lazy-loaded, they're not the bottleneck now
+  - Database actions are all bulked out and appropriate lazy/eager-loaded, not the bottleneck now
   - Maybe this can be multi-threaded, multiple portfolio sims can definitely be ran at once
   - Longterm a worker model might be appropriate for high-complexity
   - Rewriting in a faster language is more work than it's worth right now

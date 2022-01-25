@@ -36,7 +36,7 @@ class StockMarket:
         self.session.bulk_save_objects(daily_stock_prices, update_changed_only=True)
         self.session.commit()
 
-    def select_daily_price(self, ticker=None, from_date=None, limit=0) -> list:
+    def select_daily_price(self, ticker=None, from_date=None, limit=0, lazy_load=True) -> list:
         """query saved daily price data from the daily_stock_price table"""
         query = select([DailyStockPrice]).order_by(desc(DailyStockPrice.date))
         if ticker:
@@ -48,8 +48,12 @@ class StockMarket:
             query = query.limit(limit)
         price_data = [elem[0] for elem in self.session.execute(query).all()]
         if not price_data:
-            msg = f"Failed to fetch stock prices for {ticker} at {from_date} from the database"
-            raise StockDataNotFound(msg)
+            if lazy_load and ticker:
+                self.download_daily_price_history(ticker)
+                price_data = [elem[0] for elem in self.session.execute(query).all()]
+            else:
+                msg = f"Failed to fetch stock prices for {ticker} at {from_date} from the database"
+                raise StockDataNotFound(msg)
         return price_data
 
     def get_daily_price(self, ticker, from_date=None, limit=0) -> list:

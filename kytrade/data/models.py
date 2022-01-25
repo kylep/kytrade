@@ -34,19 +34,6 @@ class DailyStockPrice(Base):
         return _gen_repr(self)
 
 
-class DailySMA(Base):
-    """Simple Moving Average"""
-
-    __tablename__ = "daily_sma"
-    id = Column(Integer, primary_key=True)
-    ticker = Column(String(8))
-    date = Column(Date)
-    style = Column(String(16))
-    days = Column(Integer)
-    value = Column(Float)
-
-    def __repr__(self):
-        return _gen_repr(self)
 
 
 class PortfolioSimulator(Base):
@@ -61,6 +48,11 @@ class PortfolioSimulator(Base):
     opened = Column(Date)
     date = Column(Date)
     usd = Column(Float)
+    # all_time_high = Column(Float)
+    # all_time_low = Column(Float)
+    # max_drawdown = Column(Float)
+    # next up:
+    # variance = Column(Float)
 
     def __repr__(self):
         return _gen_repr(self)
@@ -124,6 +116,22 @@ class PortSimStockTransaction(Base):
     qty = Column(Integer)
     unit_price = Column(Float)
     action = Column(String(4))  # "buy" / "sell"  - Consider using an enum... compatability issues?
+
+    def __repr__(self):
+        return _gen_repr(self)
+
+
+
+class DailySMA(Base):
+    """Simple Moving Average"""
+
+    __tablename__ = "daily_sma"
+    id = Column(Integer, primary_key=True)
+    ticker = Column(String(8))
+    date = Column(Date)
+    style = Column(String(16))
+    days = Column(Integer)
+    value = Column(Float)
 
     def __repr__(self):
         return _gen_repr(self)

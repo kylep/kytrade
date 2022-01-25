@@ -13,7 +13,6 @@ def _get_ps_table(portfolios: list):
     headers = [
         "id",
         "name",
-        "opened",
         "date",
         "positions",
         "book.val",
@@ -27,7 +26,6 @@ def _get_ps_table(portfolios: list):
         row = [
             portfolio.id,
             portfolio.name,
-            str(portfolio.orm_ps.opened),
             str(portfolio.date),
             positions,
             f"${portfolio.total_deposited:,.2f}",
@@ -63,10 +61,26 @@ def _list():
     click.echo(table)
 
 
+@click.argument("id")
 @click.command()
-def details():
+def describe(id):
     """Print a detailed overview of a portfolio instance"""
-    click.echo("TODO")
+    portfolio = ps.Portfolio.load(id)
+    table = BeautifulTable(maxwidth=120)
+    table.set_style(BeautifulTable.STYLE_MARKDOWN)
+    table.rows.append(["ID", portfolio.id])
+    table.rows.append(["Name", portfolio.name])
+    table.rows.append(["Start Date", str(portfolio.date_opened)])
+    table.rows.append(["Simulation Date", str(portfolio.date)])
+    days = (portfolio.date - portfolio.date_opened).days
+    table.rows.append(["Days Open", f"{days:,}"])
+    years = days / 365.25
+    table.rows.append(["Years Open", f"{years:.2f}"])
+    table.rows.append(["Book Value", f"${portfolio.total_deposited:,.2f}"])
+    table.rows.append(["Market Value", f"${portfolio.value_at_close:,.2f}"])
+    table.rows.append(["Total Profit", f"${portfolio.profit:,.2f}"])
+    table.rows.append(["Percent Profit", f"{portfolio.profit_percent:.2f}%"])
+    click.echo(table)
 
 
 @click.argument("id")
@@ -117,7 +131,7 @@ def value_history(id, table):
 
 portfolio_simulator.add_command(create)
 portfolio_simulator.add_command(_list)
-portfolio_simulator.add_command(details)
+portfolio_simulator.add_command(describe)
 portfolio_simulator.add_command(delete)
 portfolio_simulator.add_command(advance)
 portfolio_simulator.add_command(tx)

@@ -107,6 +107,11 @@ class Portfolio:
         return self.orm_ps.date
 
     @property
+    def date_opened(self):
+        """Return date the portfolio was opened"""
+        return self.orm_ps.opened
+
+    @property
     def name(self):
         """Get the Portfolio from the orm"""
         return self.orm_ps.name

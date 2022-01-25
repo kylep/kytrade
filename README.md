@@ -37,6 +37,7 @@ kt ps list
 kt ps tx buy-stock qqq-bah --ticker QQQ --qty 100 --close --comp
 kt ps tx list qqq-bah
 kt ps advance qqq-bah --to-date 2020-01-01
+kt ps describe qqq-bah
 mkdir -p output
 kt ps value-history --csv qqq-bah | tee output/qqq-bah-2010-01-01-to-2020-01-01.csv
 ```
@@ -51,13 +52,17 @@ kt ps value-history --csv qqq-bah | tee output/qqq-bah-2010-01-01-to-2020-01-01.
 
 - The command-line is functional
 - Advancing detween days works and the value history is logged using daily stock data
+- Live profit % tracker slightly slows down simulations but makes them FUN
+  - Disable tracker with `--no-print-status` for marginal speed improvement
 - daily open/close Stategies are not implemented
-- Dividends and splits aren't included in the alphavantage free data. Performance will appear
+- Dividends and splits aren't included in the alphavantage free data. Stock performance will appear
   worse until I pay them...
 - Web UI / chart generation not started
 - Simulation speed is much improved, simulating ~20yrs takes ~50s. Could still be faster.
-  - Pretty sure the inserts of the price data aren't happening in bulk, causing a ton of little
-    INSERTS to slow things way down
+  - Database actions are all bulked out and lazy-loaded, they're not the bottleneck now
+  - Maybe this can be multi-threaded, multiple portfolio sims can definitely be ran at once
+  - Longterm a worker model might be appropriate for high-complexity
+  - Rewriting in a faster language is more work than it's worth right now
 
 
 ---
@@ -205,6 +210,11 @@ kt ps advance [PS ID]
 Advance time to a specific date
 ```
 kt ps advance [PS ID] -d [YYYY-MM-DD]
+```
+
+Display detailed statistics about the portfolio
+```
+kt ps describe [PS ID]
 ```
 
 Print the value of the portfolio over time

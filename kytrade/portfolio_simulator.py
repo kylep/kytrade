@@ -184,16 +184,18 @@ class Portfolio:
         )
         self.orm_value_history.append(day)
 
-    def advance_one_day(self):
+    def advance_one_day(self, print_status=False):
         """Advance one day"""
         self._update_value_history()
         self.orm_ps.date += datetime.timedelta(days=1)
+        if print_status:
+            print(f"{self.date}: {self.profit_percent:.2f}%                 ", end = "\r")
 
-    def advance_to_date(self, date: str = None):
+    def advance_to_date(self, date: str = None, print_status: bool = False):
         """Advance the date one day, or to the given date YYYY-MM-DD"""
         dt_date = datetime.date.fromisoformat(date)
         while self.orm_ps.date < dt_date:
-            self.advance_one_day()
+            self.advance_one_day(print_status)
 
     def add_stock(self, ticker, qty):
         """Add shares, creating a new position if needed"""
@@ -265,12 +267,10 @@ class Portfolio:
         self.session.commit()
         self.session.refresh(self.orm_ps)  # Refresh the portfolio ID
         # Save each transaction - make sure they link to this portfolio
-        print("updating IDs")
         for record in self.orm_objects:
             record.portfolio_id = self.id  # TODO: I don't think I need this any more...
         #    self.session.add(record)  # This was not performing well ...
         # If you don't commit after each bulk_save you get a StaleDataError
-        print("Executing save")
         self.session.bulk_save_objects(self.orm_stock_positions)
         self.session.commit()
         self.session.bulk_save_objects(self.orm_stock_transactions)

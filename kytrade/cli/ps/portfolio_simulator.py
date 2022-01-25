@@ -77,18 +77,20 @@ def delete(id):
     click.echo(f"Done")
 
 
+@click.option("--print-status/--no-print-status", default=True, help="Print sim status")
 @click.option("--to-date", "-d", required=False, default=None, help="Advance to date YYYY-MM-DD")
 @click.argument("id")
 @click.command()
-def advance(id, to_date):
+def advance(id, to_date, print_status):
     """Advance the ps 1 day or to --to-date"""
     portfolio = ps.Portfolio.load(id)
     if to_date:
         click.echo(f"Simulating daily activities to {to_date}...")
-        portfolio.advance_to_date(to_date)
+        portfolio.advance_to_date(to_date, print_status=print_status)
+        click.echo("")
     else:
         portfolio.advance_one_day()
-    click.echo("Saving...")
+    click.echo("Saving....")
     portfolio.save()
 
 

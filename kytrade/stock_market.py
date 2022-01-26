@@ -56,8 +56,18 @@ class StockMarket:
                 raise StockDataNotFound(msg)
         return price_data
 
+    def get_oldest_price(self, ticker) -> datetime.date:
+        """Return the oldest date of a saved stock"""
+        return min([stock.date for stock in self.get_daily_price(ticker)])
+
     def get_daily_price(self, ticker, from_date=None, limit=0) -> list:
         """Return lazy-loaded price data"""
+        if from_date:
+            dt_date = datetime.date.fromisoformat(str(from_date))
+            oldest_price = self.get_oldest_price(ticker)
+            if dt_date < oldest_price:
+                err = f"Data on {ticker} not available at {from_date} - earliest is {oldest_price}"
+                raise StockDataNotFound(err)
         # Lazy-load the price data
         # self.select_daily_price[ticker][0] is the newest, [-1] is the oldest
         if ticker not in self.daily_price_history:
@@ -85,3 +95,9 @@ class StockMarket:
         """Return the closing price for the given stock at the given day"""
         daily_price = self.get_daily_price(ticker=ticker, from_date=date, limit=1)[0]
         return SpotPrice(daily_price.open, daily_price.close)
+
+    def simple_moving_average(self, ticker:str, date: str, duration: str, at: str):
+        """Calculate the simple moving average of a stock
+        at: open, close
+        """
+

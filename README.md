@@ -45,24 +45,9 @@ kt ps value-history --csv qqq-bah | tee output/qqq-bah-2010-01-01-to-2020-01-01.
 
 ---
 
-
-
 # Status
 
-- The command-line is functional
-- Advancing detween days works and the value history is logged using daily stock data
-- Live profit % tracker slightly slows down simulations but makes them FUN
-  - Disable tracker with `--no-print-status` for marginal speed improvement
-- daily open/close Stategies are not implemented
-- Dividends and splits aren't included in the alphavantage free data. Stock performance will appear
-  worse until I pay them...
-- Web UI / chart generation not started
-- Simulation speed is much improved, simulating ~20yrs takes ~50s. Could still be faster.
-  - Database actions are all bulked out and appropriate lazy/eager-loaded, not the bottleneck now
-  - Maybe this can be multi-threaded, multiple portfolio sims can definitely be ran at once
-  - Longterm a worker model might be appropriate for high-complexity
-  - Rewriting in a faster language is more work than it's worth right now
-
+See the [todo list](todo.md)
 
 ---
 

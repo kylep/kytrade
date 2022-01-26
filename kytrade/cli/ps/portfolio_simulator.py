@@ -11,14 +11,13 @@ def _get_ps_table(portfolios: list):
     table = BeautifulTable(maxwidth=120)
     table.set_style(BeautifulTable.STYLE_MARKDOWN)
     headers = [
-        "id",
-        "name",
-        "date",
-        "positions",
-        "book.val",
-        "mkt.val",
-        "abs.profit",
-        "pct.profit",
+        "ID",
+        "Name",
+        "Start",
+        "End",
+        "Positions",
+        "CAGR",
+        "ROI",
     ]
     table.columns.header = headers
     for portfolio in portfolios:
@@ -26,12 +25,11 @@ def _get_ps_table(portfolios: list):
         row = [
             portfolio.id,
             portfolio.name,
+            str(portfolio.date_opened),
             str(portfolio.date),
             positions,
-            f"${portfolio.total_deposited:,.2f}",
-            f"${portfolio.value_at_close:,.2f}",
-            f"${portfolio.profit:,.2f}",
-            f"{portfolio.profit_percent:.2f}%",
+            f"{portfolio.compound_anual_growth_rate:,.2f}%",
+            f"{portfolio.return_on_investment:.2f}%",
         ]
         table.rows.append(row)
     return table
@@ -70,17 +68,15 @@ def describe(id):
     table.set_style(BeautifulTable.STYLE_COMPACT)
     table.rows.append(["ID", portfolio.id])
     table.rows.append(["Name", portfolio.name])
-    table.rows.append(["CAGR", portfolio.compound_anual_growth_rate])
+    table.rows.append(["Compound Anual Growth Rate", f"{portfolio.compound_anual_growth_rate:.2f}%"])
     table.rows.append(["Start Date", str(portfolio.date_opened)])
     table.rows.append(["Simulation Date", str(portfolio.date)])
-    days = (portfolio.date - portfolio.date_opened).days
-    table.rows.append(["Days Open", f"{days:,}"])
-    years = days / 365.25
-    table.rows.append(["Years Open", f"{years:.2f}"])
+    table.rows.append(["Days Open", f"{portfolio.days_opened:,}"])
+    table.rows.append(["Years Open", f"{portfolio.years_opened:.2f}"])
     table.rows.append(["Book Value", f"${portfolio.total_deposited:,.2f}"])
     table.rows.append(["Market Value", f"${portfolio.value_at_close:,.2f}"])
-    table.rows.append(["All-Time Profit", f"${portfolio.profit:,.2f}"])
-    table.rows.append(["All-Time Profit %", f"{portfolio.profit_percent:.2f}%"])
+    table.rows.append(["Total Profit", f"${portfolio.profit:,.2f}"])
+    table.rows.append(["Return on Investment", f"{portfolio.return_on_investment:.2f}%"])
     table.rows.append(["All-Time Low", f"${portfolio.all_time_daily_low.total_usd:,.2f} at {portfolio.all_time_daily_low.date}"])
     table.rows.append(["All-Time High", f"${portfolio.all_time_daily_high.total_usd:,.2f} at {portfolio.all_time_daily_high.date}"])
     click.echo(table)

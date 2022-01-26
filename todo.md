@@ -3,7 +3,8 @@
 ## Soon
 
 - impl `ps.max_drawdown` and print it in describe table
-- `ps.profit` should really be `ps.return_on_capital`
+- `ps.profit` should really be `ps.return_on_investment`
+- impl `ps.discounted_cash_flows`
 - Calculate SMA's
 - Impl a simple on-open strategy of some sort to prove the concept
   - Idea: "Paper Hands" strategy
@@ -20,6 +21,7 @@
 - Web UI
 - Interday data in backtests and interday strategy triggers
 - Options
+- Bonds
 - S&P Futures
 - Commodities
 - Crypto
@@ -27,6 +29,7 @@
 
 # Done!
 
+- Added CAGR to portfolio and describe output
 - `kt ps describe` shows table of useful derived stats
 - getting started demo
 - simulation DB operations much optimized

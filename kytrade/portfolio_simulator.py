@@ -2,6 +2,7 @@ import datetime
 from sqlalchemy import select, delete, desc, or_
 from sqlalchemy.exc import NoResultFound
 
+from kytrade import calc
 from kytrade.data.db import get_session
 from kytrade.data import models
 from kytrade.stock_market import StockMarket
@@ -52,7 +53,7 @@ class Portfolio:
         return instance
 
     @property
-    def orm_objects(self):
+    def orm_objects(self) -> list:
         """Return a list of all the ORM objects associated with this portsim"""
         return (
             self.orm_stock_positions
@@ -61,7 +62,7 @@ class Portfolio:
             + self.orm_value_history
         )
 
-    def _load_orm_prop(self, model, orm_list: list):
+    def _load_orm_prop(self, model, orm_list: list) -> list:
         """Populate the ORM properies of the given model associated with this portfolio"""
         if not orm_list:
             query = select(model).where(model.portfolio_id == self.id)
@@ -71,38 +72,38 @@ class Portfolio:
         return orm_list
 
     @property
-    def stock_positions(self):
+    def stock_positions(self) -> list:
         """Get the stock positions - read from DB on first query"""
         return self._load_orm_prop(models.PortSimStockPosition, self.orm_stock_positions)
 
     @property
-    def stock_transactions(self):
+    def stock_transactions(self) -> list:
         """List of PortSimStockTransaction orm objects"""
         return self._load_orm_prop(models.PortSimStockTransaction, self.orm_stock_transactions)
 
     @property
-    def cash_operations(self):
+    def cash_operations(self) -> list:
         """List of PortSimCashOperation objects"""
         return self._load_orm_prop(models.PortSimCashOperation, self.orm_cash_operations)
 
     @property
-    def value_history(self):
+    def value_history(self) -> list:
         return self._load_orm_prop(models.PortfolioSimulatorValueHistoryDay, self.orm_value_history)
 
     @property
-    def cash(self):
+    def cash(self) -> float:
         """in usd"""
         return self.orm_ps.usd
 
     @cash.setter
-    def cash(self, value):
+    def cash(self, value) -> None:
         """Set the portfolio cash - raise InsufficientFundsError if negative"""
         self.orm_ps.usd = value
         if value < 0:
             raise InsufficientFundsError(f"Portfolio cash {value} is negative")
 
     @property
-    def date(self):
+    def date(self) -> datetime.date:
         """Get the Portfolio date from the orm"""
         return self.orm_ps.date
 
@@ -110,6 +111,16 @@ class Portfolio:
     def date_opened(self):
         """Return date the portfolio was opened"""
         return self.orm_ps.opened
+
+    @property
+    def days_opened(self) -> int:
+        """Return the # of days the portfolio simulator has ran"""
+        return (self.date - self.date_opened).days
+
+    @property
+    def years_opened(self) -> float:
+        """Return the # of years the portfolio simulator has run"""
+        return self.days_opened / 365.25
 
     @property
     def name(self):
@@ -150,8 +161,8 @@ class Portfolio:
         return self.value_at_close + self.total_withdrawn - self.total_deposited
 
     @property
-    def profit_percent(self) -> float:
-        """Get the profit as a % of investment"""
+    def return_on_investment(self) -> float:
+        """Get the profit as a % of investment (ROI)"""
         return 0 if not self.total_deposited else self.profit / self.total_deposited * 100
 
     @property
@@ -177,9 +188,11 @@ class Portfolio:
 
     @property
     def compound_anual_growth_rate(self) -> float:
-        """Return the CAGR of this portfolio"""
-        # (begining_value/ending_value)**(1/num_years)
-        return 0
+        """Return the CAGR % of this portfolio"""
+        ending_value = self.value_at_close + self.total_withdrawn
+        return calc.compound_anual_growth_rate(
+            begin_value=self.total_deposited, end_value=ending_value, years=self.years_opened
+        )
 
     def deposit(self, value):
         """deposit cash into the portsim"""
@@ -212,7 +225,7 @@ class Portfolio:
         self._update_value_history()
         self.orm_ps.date += datetime.timedelta(days=1)
         if print_status:
-            print(f"{self.date}: {self.profit_percent:.2f}%                 ", end = "\r")
+            print(f"{self.date}: {self.profit_percent:.2f}%                 ", end="\r")
 
     def advance_to_date(self, date: str = None, print_status: bool = False):
         """Advance the date one day, or to the given date YYYY-MM-DD"""

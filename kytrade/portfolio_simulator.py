@@ -225,7 +225,12 @@ class Portfolio:
         self._update_value_history()
         self.orm_ps.date += datetime.timedelta(days=1)
         if print_status:
-            print(f"{self.date}: {self.profit_percent:.2f}%                 ", end="\r")
+            space = " " * 120
+            print(
+                f"{self.date} "
+                f"ROI={self.return_on_investment:.2f}% "
+                f"CAGR={self.compound_anual_growth_rate:.2f}%"
+                f"{space}", end="\r")
 
     def advance_to_date(self, date: str = None, print_status: bool = False):
         """Advance the date one day, or to the given date YYYY-MM-DD"""

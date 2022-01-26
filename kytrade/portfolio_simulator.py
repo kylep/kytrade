@@ -155,13 +155,31 @@ class Portfolio:
         return 0 if not self.total_deposited else self.profit / self.total_deposited * 100
 
     @property
-    def tx_profit(self):
+    def tx_profit(self) -> float:
         """Profit from all the transactions so far + the value of current positions"""
         tx_profit = 0
         for transaction in self.stock_transactions:
             multiplier = 1 if transaction.action == "SELL" else -1  # buy subtracts, sell adds $
             tx_profit += multiplier * transaction.qty * transaction.unit_price
         return tx_profit
+
+    @property
+    def all_time_daily_low(self) -> models.PortfolioSimulatorValueHistoryDay:
+        """Return the all-time-low of the portfolio's daily values"""
+        low = min([day.total_usd for day in self.value_history])
+        return next((value for value in self.value_history if value.total_usd == low))
+
+    @property
+    def all_time_daily_high(self) -> models.PortfolioSimulatorValueHistoryDay:
+        """Return the all-time-low of the portfolio's daily values"""
+        high = max([day.total_usd for day in self.value_history])
+        return next((value for value in self.value_history if value.total_usd == high))
+
+    @property
+    def compound_anual_growth_rate(self) -> float:
+        """Return the CAGR of this portfolio"""
+        # (begining_value/ending_value)**(1/num_years)
+        return 0
 
     def deposit(self, value):
         """deposit cash into the portsim"""

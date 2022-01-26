@@ -1,6 +1,6 @@
 """ portfoliocommands """
 import click
-from beautifultable import BeautifulTable
+from beautifultable import BeautifulTable, ALIGN_LEFT
 
 import kytrade.portfolio_simulator as ps
 from kytrade.cli.ps.tx import tx
@@ -66,10 +66,11 @@ def _list():
 def describe(id):
     """Print a detailed overview of a portfolio instance"""
     portfolio = ps.Portfolio.load(id)
-    table = BeautifulTable(maxwidth=120)
-    table.set_style(BeautifulTable.STYLE_MARKDOWN)
+    table = BeautifulTable(maxwidth=120, default_alignment=ALIGN_LEFT)
+    table.set_style(BeautifulTable.STYLE_COMPACT)
     table.rows.append(["ID", portfolio.id])
     table.rows.append(["Name", portfolio.name])
+    table.rows.append(["CAGR", portfolio.compound_anual_growth_rate])
     table.rows.append(["Start Date", str(portfolio.date_opened)])
     table.rows.append(["Simulation Date", str(portfolio.date)])
     days = (portfolio.date - portfolio.date_opened).days
@@ -78,8 +79,10 @@ def describe(id):
     table.rows.append(["Years Open", f"{years:.2f}"])
     table.rows.append(["Book Value", f"${portfolio.total_deposited:,.2f}"])
     table.rows.append(["Market Value", f"${portfolio.value_at_close:,.2f}"])
-    table.rows.append(["Total Profit", f"${portfolio.profit:,.2f}"])
-    table.rows.append(["Percent Profit", f"{portfolio.profit_percent:.2f}%"])
+    table.rows.append(["All-Time Profit", f"${portfolio.profit:,.2f}"])
+    table.rows.append(["All-Time Profit %", f"{portfolio.profit_percent:.2f}%"])
+    table.rows.append(["All-Time Low", f"${portfolio.all_time_daily_low.total_usd:,.2f} at {portfolio.all_time_daily_low.date}"])
+    table.rows.append(["All-Time High", f"${portfolio.all_time_daily_high.total_usd:,.2f} at {portfolio.all_time_daily_high.date}"])
     click.echo(table)
 
 

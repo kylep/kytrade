@@ -32,13 +32,10 @@ def test_stock_close_average(sample_stocks):
 def test_stock_close_variance(sample_stocks):
     """test stock_close_variance"""
     variance = calc.stock_close_variance(sample_stocks)
-    two_thirds_percent = 2/3*100
-    # Really gotta sort out Pythons weird floating point problem
-    assert variance == 66.66666666666667
+    assert variance == 100
 
 
 def test_stocks_close_standard_dev(sample_stocks):
     """test stocks_close_standard_dev"""
     standard_deviation = calc.stocks_close_standard_dev(sample_stocks)
-    # TODO: Get someone to check if this is actually right...
-    assert standard_deviation == 8.16496580927726
+    assert standard_deviation == 10

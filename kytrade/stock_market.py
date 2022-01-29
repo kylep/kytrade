@@ -52,7 +52,7 @@ class StockMarket:
                 "200_day_variance": calc.stock_close_variance(days[:200]),
                 "all_time_variance": calc.stock_close_variance(days),
                 "20_day_standard_deviation": calc.stocks_close_standard_dev(days[:20]),
-                "200_day_standard_deviation": calc.stocks_close_standard_dev(days[:20]),
+                "200_day_standard_deviation": calc.stocks_close_standard_dev(days[:200]),
                 "all_time_standard_deviation": calc.stocks_close_standard_dev(days[:20])
             }
         return meta

@@ -135,6 +135,28 @@ kt download daily-stock-prices SPY
 ```
 
 
+## Stock Market
+
+The Stock Market stores data outside of portfolios. Currently it stores daily stock prices.
+Operated using `kt sm`, which stands for "kytrade stock market", the StockMarket entity also
+computes various metadata about each tracked stock.
+
+Download the price history for a given ticker
+```
+kt sm download-daily-stock-prices [TICKER]
+```
+
+List the price history of a given ticker. See the help output for optional filtering arguments.
+```
+kt sm print-daily-prices --help
+```
+
+List the downloaded data, by ticker
+```
+kt sm list-daily
+```
+
+
 ## Portfolio Simulator
 
 ### Creating and deleting portfolios

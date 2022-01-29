@@ -3,8 +3,7 @@ import sys
 import click
 from kytrade.const import VERSION
 from kytrade.cli.calc import calc
-from kytrade.cli.pprint import pprint
-from kytrade.cli.download import download
+from kytrade.cli.stock_market import sm
 from kytrade.cli.init import init
 from kytrade.cli.ps.portfolio_simulator import portfolio_simulator as ps
 
@@ -26,8 +25,7 @@ def version():
 
 
 shell.add_command(version)
-shell.add_command(pprint)
-shell.add_command(download)
+shell.add_command(sm)
 shell.add_command(init)
 shell.add_command(calc)
 shell.add_command(ps)

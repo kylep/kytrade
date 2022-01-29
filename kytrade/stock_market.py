@@ -2,9 +2,9 @@
 import datetime
 from collections import namedtuple
 
-from sqlalchemy import select, desc
+from sqlalchemy import select, asc, desc, func
 
-from kytrade import alphavantage
+from kytrade import alphavantage, calc
 from kytrade.data.db import get_session
 from kytrade.data.models import DailyStockPrice
 
@@ -30,7 +30,40 @@ class StockMarket:
         """Construct a StockMarket"""
         self.session = session if session else self.session
 
-    def download_daily_price_history(self, ticker):
+    @property
+    def metadata(self) -> dict:
+        """Query, calculate, and return a dict of metadata about the stocks"""
+        meta = {}
+        for ticker in self.saved_tickers:
+            days = self.get_daily_price(ticker)  # they're in chrono order, [0] is newest
+            years_open = (days[0].date - days[-1].date).days / 365.25
+            meta[ticker] = {
+                "count": len(days),
+                "start": str(days[-1].date),
+                "end": str(days[0].date),
+                "compound_anual_growth_rate": calc.compound_anual_growth_rate(days[-1].close, days[0].close, years_open),
+                "last_value": days[0].close,
+                "high": max([day.high for day in days]),
+                "low": min([day.low for day in days]),
+                "20_day_average": calc.stock_close_average(days[:20]),
+                "200_day_average": calc.stock_close_average(days[:200]),
+                "all_time_average": calc.stock_close_average(days),
+                "20_day_variance": calc.stock_close_variance(days[:20]),
+                "200_day_variance": calc.stock_close_variance(days[:200]),
+                "all_time_variance": calc.stock_close_variance(days),
+                "20_day_standard_deviation": calc.stocks_close_standard_dev(days[:20]),
+                "200_day_standard_deviation": calc.stocks_close_standard_dev(days[:20]),
+                "all_time_standard_deviation": calc.stocks_close_standard_dev(days[:20])
+            }
+        return meta
+
+    @property
+    def saved_tickers(self) -> list:
+        """Return a list of saved tickers"""
+        ticker_query = select(DailyStockPrice.ticker).distinct()
+        return [elem[0] for elem in self.session.execute(ticker_query).all()]
+
+    def download_daily_price_history(self, ticker) -> None:
         """Save the ticker data from upstream APIs to the local database"""
         daily_stock_prices = alphavantage.get_daily_stock_prices(ticker, compact=False)
         self.session.bulk_save_objects(daily_stock_prices, update_changed_only=True)
@@ -61,14 +94,13 @@ class StockMarket:
         return min([stock.date for stock in self.get_daily_price(ticker)])
 
     def get_daily_price(self, ticker, from_date=None, limit=0) -> list:
-        """Return lazy-loaded price data"""
+        """Return pre-cached price data"""
         if from_date:
             dt_date = datetime.date.fromisoformat(str(from_date))
             oldest_price = self.get_oldest_price(ticker)
             if dt_date < oldest_price:
                 err = f"Data on {ticker} not available at {from_date} - earliest is {oldest_price}"
                 raise StockDataNotFound(err)
-        # Lazy-load the price data
         # self.select_daily_price[ticker][0] is the newest, [-1] is the oldest
         if ticker not in self.daily_price_history:
             self.daily_price_history[ticker] = self.select_daily_price(ticker=ticker)
@@ -89,15 +121,9 @@ class StockMarket:
             return self.daily_price_history[ticker][index:]
         else:
             # same as above, but only return up to the index indicated by the limit
-            return self.daily_price_history[ticker][index:index+limit]
+            return self.daily_price_history[ticker][index : index + limit]
 
     def get_spot(self, ticker: str, date: str) -> float:
         """Return the closing price for the given stock at the given day"""
         daily_price = self.get_daily_price(ticker=ticker, from_date=date, limit=1)[0]
         return SpotPrice(daily_price.open, daily_price.close)
-
-    def simple_moving_average(self, ticker:str, date: str, duration: str, at: str):
-        """Calculate the simple moving average of a stock
-        at: open, close
-        """
-

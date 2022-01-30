@@ -22,15 +22,13 @@ def list_daily():
         "End",
         "CAGR",
         "ATH",
-        "ATL",
         "Close",
-        "20d.sma",
-        "200d.sma",
-        "Avg",
-        "20d.σ²",
-        "200d.σ²",
-        "20d.σ",
-        "200d.σ"
+        "sma.20",
+        "sma.200",
+        "σ².20",
+        "σ².200",
+        "bband.l",
+        "bband.h"
     ]
     for ticker, meta in sm.metadata.items():
         row = [
@@ -39,15 +37,13 @@ def list_daily():
             meta["end"],
             f"{meta['compound_anual_growth_rate']:.2f}%",
             f"${meta['high']:,.2f}",
-            f"${meta['low']:,.2f}",
             f"${meta['last_value']:,.2f}",
             f"${meta['20_day_average']:,.2f}",
             f"${meta['200_day_average']:,.2f}",
-            f"{meta['all_time_average']:,.2f}",
             f"{meta['20_day_variance']:.2f}%",
             f"{meta['200_day_variance']:.2f}%",
-            f"{meta['20_day_standard_deviation']:.2f}",
-            f"{meta['200_day_standard_deviation']:.2f}",
+            f"${meta['20d_lower_bollinger_band']:,.2f}",
+            f"${meta['20d_upper_bollinger_band']:,.2f}",
         ]
         table.rows.append(row)
     click.echo(table)

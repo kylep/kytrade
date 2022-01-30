@@ -25,17 +25,17 @@ def test_compound_anual_growth_rate():
 
 def test_stock_close_average(sample_stocks):
     """Test the stock_close_average logic"""
-    avg = calc.stock_close_average(sample_stocks)
+    avg = calc.average([stock.close for stock in sample_stocks])
     assert avg == 20
 
 
 def test_stock_close_variance(sample_stocks):
     """test stock_close_variance"""
-    variance = calc.stock_close_variance(sample_stocks)
+    variance = calc.variance([stock.close for stock in sample_stocks])
     assert variance == 100
 
 
 def test_stocks_close_standard_dev(sample_stocks):
     """test stocks_close_standard_dev"""
-    standard_deviation = calc.stocks_close_standard_dev(sample_stocks)
+    standard_deviation = calc.standard_deviation([stock.close for stock in sample_stocks])
     assert standard_deviation == 10

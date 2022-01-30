@@ -36,6 +36,7 @@
 
 # Done!
 
+- bollinger bands calculation and screener
 - standard deviations and variances in screener
 - impl `simple_moving_average` in sm - used the new metadata dict
 - impl `kt sm list-daily`

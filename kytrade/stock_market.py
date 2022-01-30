@@ -30,36 +30,41 @@ class StockMarket:
         """Construct a StockMarket"""
         self.session = session if session else self.session
 
+    def get_metadata(self, ticker: str) -> dict:
+        """Query, calculate, and return a dict of metadata about the stocks"""
+        days = self.get_daily_price(ticker)  # they're in chrono order desc, [0] is newest
+        close = [day.close for day in days]
+        years_open = (days[0].date - days[-1].date).days / 365.25
+        cagr = calc.compound_anual_growth_rate(close[-1], close[0], years_open)
+        return {
+
+            "count": len(days),
+            "start": str(days[-1].date),
+            "end": str(days[0].date),
+            "compound_anual_growth_rate": cagr,
+            "last_value": close[0],
+            "high": max([day.high for day in days]),
+            "low": min([day.low for day in days]),
+            "20_day_average": calc.average(close[:20]),
+            "200_day_average": calc.average(close[:200]),
+            "all_time_average": calc.average(close),
+            "20_day_variance": calc.variance(close[:20]),
+            "200_day_variance": calc.variance(close[:200]),
+            "all_time_variance": calc.variance(close),
+            "20_day_standard_deviation": calc.standard_deviation(close[:20]),
+            "200_day_standard_deviation": calc.standard_deviation(close[:200]),
+            "all_time_standard_deviation": calc.standard_deviation(close),
+            "20d_bollinger_band": calc.bollinger_bands(close[:20]),
+            "max_drawdown": calc.max_drawdown(close)
+        }
+
+
     @property
     def metadata(self) -> dict:
-        """Query, calculate, and return a dict of metadata about the stocks"""
+        """Query, calculate, and return a dict of metadata about all stocks"""
         meta = {}
         for ticker in self.saved_tickers:
-            days = self.get_daily_price(ticker)  # they're in chrono order, [0] is newest
-            close = [day.close for day in days]
-            years_open = (days[0].date - days[-1].date).days / 365.25
-            cagr = calc.compound_anual_growth_rate(close[-1], close[0], years_open)
-            bollinger_bands = calc.bollinger_bands(close[:20])
-            meta[ticker] = {
-                "count": len(days),
-                "start": str(days[-1].date),
-                "end": str(days[0].date),
-                "compound_anual_growth_rate": cagr,
-                "last_value": close[0],
-                "high": max([day.high for day in days]),
-                "low": min([day.low for day in days]),
-                "20_day_average": calc.average(close[:20]),
-                "200_day_average": calc.average(close[:200]),
-                "all_time_average": calc.average(close),
-                "20_day_variance": calc.variance(close[:20]),
-                "200_day_variance": calc.variance(close[:200]),
-                "all_time_variance": calc.variance(close),
-                "20_day_standard_deviation": calc.standard_deviation(close[:20]),
-                "200_day_standard_deviation": calc.standard_deviation(close[:200]),
-                "all_time_standard_deviation": calc.standard_deviation(close),
-                "20d_upper_bollinger_band": bollinger_bands["high"],
-                "20d_lower_bollinger_band": bollinger_bands["low"]
-            }
+            meta[ticker] = self.get_metadata(ticker)
         return meta
 
     @property

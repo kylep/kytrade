@@ -23,19 +23,25 @@ def test_compound_anual_growth_rate():
     assert calc.compound_anual_growth_rate(start, end, years) == verify_cagr
 
 
-def test_stock_close_average(sample_stocks):
-    """Test the stock_close_average logic"""
+def test_average(sample_stocks):
+    """Test the 'average' logic"""
     avg = calc.average([stock.close for stock in sample_stocks])
     assert avg == 20
 
 
-def test_stock_close_variance(sample_stocks):
-    """test stock_close_variance"""
+def test_variance(sample_stocks):
+    """test variance"""
     variance = calc.variance([stock.close for stock in sample_stocks])
     assert variance == 100
 
 
-def test_stocks_close_standard_dev(sample_stocks):
-    """test stocks_close_standard_dev"""
+def test_standard_dev(sample_stocks):
+    """test standard deviation"""
     standard_deviation = calc.standard_deviation([stock.close for stock in sample_stocks])
     assert standard_deviation == 10
+
+def test_max_drawdown():
+    """test the max drawdown"""
+    vals = [ 1, 10, 100, 90, 95, 50, 55, 110, 200, 110]
+    mdd = calc.max_drawdown(vals)
+    assert mdd["ratio"] == -.5

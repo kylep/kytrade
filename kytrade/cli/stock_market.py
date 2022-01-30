@@ -21,32 +21,43 @@ def list_daily():
         "Start",
         "End",
         "CAGR",
+        "MDD",
         "ATH",
         "Close",
         "sma.20",
         "sma.200",
         "σ².20",
         "σ².200",
-        "bband.l",
-        "bband.h"
+        "bbands",
     ]
     for ticker, meta in sm.metadata.items():
+        mdd = f"{meta['max_drawdown']['percent']:,.2f}% - from {meta['max_drawdown']['peak']} to {meta['max_drawdown']['trough']}",
         row = [
             ticker,
             meta["start"],
             meta["end"],
             f"{meta['compound_anual_growth_rate']:.2f}%",
+            mdd,
             f"${meta['high']:,.2f}",
             f"${meta['last_value']:,.2f}",
             f"${meta['20_day_average']:,.2f}",
             f"${meta['200_day_average']:,.2f}",
             f"{meta['20_day_variance']:.2f}%",
             f"{meta['200_day_variance']:.2f}%",
-            f"${meta['20d_lower_bollinger_band']:,.2f}",
-            f"${meta['20d_upper_bollinger_band']:,.2f}",
+            f"{meta['20d_bollinger_band']['status']}",
         ]
         table.rows.append(row)
     click.echo(table)
+
+
+@click.argument("ticker")
+@click.command()
+def describe_stock(ticker):
+    sm = StockMarket()
+    prices = sm.get_daily_price(ticker)
+    meta = prices.metadata
+    click.echo(ticker)
+
 
 
 @click.argument("ticker")
@@ -79,3 +90,4 @@ def print_daily_prices(ticker, from_date, limit):
 sm.add_command(download_daily_stock_prices)
 sm.add_command(list_daily)
 sm.add_command(print_daily_prices)
+sm.add_command(describe_stock)

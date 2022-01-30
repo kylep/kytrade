@@ -33,4 +33,32 @@ def bollinger_bands(values: list) -> dict:
     bband_size = standard_deviation(values) * 2
     high = sma + bband_size
     low = sma - bband_size
-    return {"high": high, "low": low, "sma": sma}
+    status = "INSIDE"
+    if values[0] > high:
+        status = "ABOVE"
+    elif values[0] < low:
+        status = "BELOW"
+    return {"high": high, "low": low, "sma": sma, "status": status}
+
+
+def max_drawdown(values: list) -> dict:
+    """Calculate the max drawdown (MDD) of given chronologically descending ordered list
+    To use MDD as a percentage, multiply ratio by -100
+    Return dict with keys: peak, trough, ratio, absolute
+    """
+    ret = {"peak": 0, "trough": 0, "ratio": 0, "absolute": 0}
+    mdd = 0
+    for i, value in reversed(list(enumerate(values))):
+        peak = max(values[: i + 1])  # not efficient!
+        trough = min(values[i:])  # also maybe not efficient!
+        test_mdd = (trough - peak) / peak
+        if test_mdd < mdd:
+            mdd = test_mdd
+            ret = {
+                "peak": peak,
+                "trough": trough,
+                "ratio": mdd,
+                "percent": (mdd * -100),
+                "absolute": (peak - trough),
+            }
+    return ret

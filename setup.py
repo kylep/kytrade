@@ -15,7 +15,8 @@ setup(
         "matplotlib",
         "alpha_vantage",
         "Click",
-        "beautifultable"
+        "beautifultable",
+        "mpmath"
     ],
     entry_points={"console_scripts": ["kt = kytrade.cli.main:shell"]},
 )

@@ -151,9 +151,12 @@ List the price history of a given ticker. See the help output for optional filte
 kt sm print-daily-prices --help
 ```
 
-List the downloaded data, by ticker
+
+### Stock Screener
+
+Various TA metadata are computed for each stock and can be printed in a table using the screener.
 ```
-kt sm list-daily
+kt sm screener
 ```
 
 
@@ -236,33 +239,6 @@ output to a file can create your csv
 ```
 mkdir output/
 kt ps balance-history[PS ID] --csv > output/my_portfolio.csv
-```
-
-
-
-## Displaying market data
-
-Show historical values. Ensure you've downloaded that ticker first.
-This is only really useful if you pipe it to a file or want to see limited data.
-```
-# Show all the saved entries for AAPL
-kt print daily-prices --ticker AAPL
-
-# Show the most recent MSFT entry
-kt print daily-prices --ticker MSFT --limit 1
-
-# Show the 5 most recent entries of SPY, ending at 2000-01-01
-kt print daily-prices --ticker SPY --limit 5 --from-date 2000-01-01
-```
-
-
-## Point-in-time calculations
-
-Calculate Simple Moving Average (SMA) of a stock from a given date, over a range, using the open,
-close, high, or low daily value.
-
-```
-kt calc sma --help
 ```
 
 

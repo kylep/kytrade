@@ -1,5 +1,6 @@
 """ Stock Market (sm) commands """
 import click
+from pprint import pprint
 from beautifultable import BeautifulTable, ALIGN_LEFT
 
 from kytrade.stock_market import StockMarket
@@ -11,8 +12,8 @@ def sm():
 
 
 @click.command()
-def list_daily():
-    """List the stocks in DB"""
+def screener():
+    """List the daily stocks in DB"""
     sm = StockMarket()
     table = BeautifulTable(maxwidth=150, default_alignment=ALIGN_LEFT)
     table.set_style(BeautifulTable.STYLE_MARKDOWN)
@@ -31,13 +32,12 @@ def list_daily():
         "bbands",
     ]
     for ticker, meta in sm.metadata.items():
-        mdd = f"{meta['max_drawdown']['percent']:,.2f}% - from {meta['max_drawdown']['peak']} to {meta['max_drawdown']['trough']}",
         row = [
             ticker,
             meta["start"],
             meta["end"],
             f"{meta['compound_anual_growth_rate']:.2f}%",
-            mdd,
+            f"{meta['max_drawdown']['percent']:,.2f}%",
             f"${meta['high']:,.2f}",
             f"${meta['last_value']:,.2f}",
             f"${meta['20_day_average']:,.2f}",
@@ -52,11 +52,11 @@ def list_daily():
 
 @click.argument("ticker")
 @click.command()
-def describe_stock(ticker):
+def describe(ticker):
     sm = StockMarket()
-    prices = sm.get_daily_price(ticker)
-    meta = prices.metadata
+    meta = sm.get_metadata(ticker)
     click.echo(ticker)
+    pprint(meta)
 
 
 
@@ -88,6 +88,6 @@ def print_daily_prices(ticker, from_date, limit):
 
 
 sm.add_command(download_daily_stock_prices)
-sm.add_command(list_daily)
+sm.add_command(screener)
 sm.add_command(print_daily_prices)
-sm.add_command(describe_stock)
+sm.add_command(describe)

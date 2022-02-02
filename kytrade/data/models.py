@@ -121,17 +121,14 @@ class PortSimStockTransaction(Base):
         return _gen_repr(self)
 
 
-
-class DailySMA(Base):
-    """Simple Moving Average"""
-
-    __tablename__ = "daily_sma"
+class ScreenerMetadata(Base):
+    """Screener Metadata
+    Calculating the metadata can take a while so its better to not have to do it every day
+    """
+    #
+    # NOTE: for now i'd really rather have a noSQL db for this since I have no idea what metadat
+    # i actually want. I'll just store the data
+    __tablename__ = "screener_metadata"
     id = Column(Integer, primary_key=True)
     ticker = Column(String(8))
-    date = Column(Date)
-    style = Column(String(16))
-    days = Column(Integer)
-    value = Column(Float)
-
-    def __repr__(self):
-        return _gen_repr(self)
+    json = Column(String(65535))

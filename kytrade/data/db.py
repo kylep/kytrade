@@ -33,6 +33,7 @@ def get_session() -> Session:
 
 def save_dataframe(orm_model: models.Base, df: DataFrame) -> None:
     """Save a pandas dataframe to the db as a given model"""
+    # TODO: Deprecate - not using pandas any more
     df.to_sql(
         orm_model.__tablename__,
         schema=const.SQL_DATABASE,

@@ -16,7 +16,7 @@ setup(
         "alpha_vantage",
         "Click",
         "beautifultable",
-        "mpmath"
+        "gmpy2"
     ],
     entry_points={"console_scripts": ["kt = kytrade.cli.main:shell"]},
 )

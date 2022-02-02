@@ -2,14 +2,21 @@
 
 ## Soon
 
-- impl `ps.max_drawdown`, `ps.max_drawdown_percent` -> float
-- impl `sm.max_drawdown`, `sm.max_drawdown_percent` -> float
-- impl `ps.longest_drawdown_duration` -> datetime.delta
-- impl `sm.longest_drawdown_duration` -> datetime.delta
+- AlphaVantage free data not useful (no split/div data), $50/month is expensive. Before buying Pro:
+  - POC of Stock-Shark API https://stock-shark.com/developers
+    - Also works for autopilot
+  - POC of Alpaca API https://alpaca.markets/data
+    - Also works for autopilot
+  - Investigate Yahoo Finance python lib
+  - Polygon seems way overpriced
+  - Investigate IBKR - though it looks like people use TWS exports mostly and I don't want to
+- move the metadata for the screener into a table so it be pre-computed
+- move the computation of metadata into calc so portsim can use it  too
 - impl `ps.sharpe_ratio` -> float
 - impl `sm.sharpe_ratio` -> float
 - impl treynor ratio (not to be confused with google's treynor curve)
   - portfolio beta
+- impl sortino ratio
 - `ps.profit` should really be `ps.return_on_investment`
 - impl `ps.discounted_cash_flows`
 - Impl a simple on-open strategy of some sort to prove the concept
@@ -22,6 +29,7 @@
 - Impl commissions
 - Handle dividends
 - Handle splits
+- Extend the "Base" base class to a "Day" base class so I'm not duck-typing it
 
 ## Wish List
 
@@ -36,6 +44,10 @@
 
 # Done!
 
+
+- rename `kt sm describe-stock` to `kt sm describe` since the `s` in `sm` is already "stock"
+- replaced `kt sm list-daily` command with `kt sm screener` since its more like a stock screener
+- impl max drawdowns and associated dates
 - bollinger bands calculation and screener
 - standard deviations and variances in screener
 - impl `simple_moving_average` in sm - used the new metadata dict

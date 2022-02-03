@@ -4,7 +4,8 @@ from collections import namedtuple
 
 from sqlalchemy import select, asc, desc, func
 
-from kytrade import alphavantage, calc
+from kytrade import calc
+from kytrade.api import alphavantage
 from kytrade.data.db import get_session
 from kytrade.data.models import DailyStockPrice
 

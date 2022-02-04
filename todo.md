@@ -10,6 +10,8 @@
   - Investigate Yahoo Finance python lib
   - Polygon seems way overpriced
   - Investigate IBKR - though it looks like people use TWS exports mostly and I don't want to
+  - https://iexcloud.io/docs/api/
+    - Alpaca appears to use this for their free tier, might be better off going to the src
 - move the metadata for the screener into a table so it be pre-computed
 - move the computation of metadata into calc so portsim can use it  too
 - impl `ps.sharpe_ratio` -> float
@@ -41,6 +43,11 @@
 - Commodities
 - Crypto
 - Self-Driving Portfolio (online hands-free algo-trader)
+
+
+## Maybe
+- Refactor to replace "ticker" with "symbol", pretty sure thats the more correct term
+
 
 # Done!
 

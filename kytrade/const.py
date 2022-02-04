@@ -18,7 +18,17 @@ def env_var(env_var_name, default, required=False):
 
 VERSION = "1.0001"
 # env_var allows reconfiguring the tool without config files - works well with containers too
+
+# Upstream API Keys
+# TODO: Pick which ones really matter
 ALPHAVANTAGE_API_KEY = env_var("ALPHAVANTAGE_API_KEY", None, required=True)
+STOCKSHARK_API_KEY = env_var("STOCKSHARK_API_KEY", None, required=False)
+ALPACA_API_KEY_ID = env_var("ALPACA_API_KEY_ID", None, required=False)
+ALPACA_API_KEY_SECRET = env_var("ALPACA_API_KEY_SECRET", None, required=False)
+ALPACA_API_ENDPOINT = env_var("ALPACA_API_ENDPOINT", "https://paper-api.alpaca.markets")
+IEXCLOUD_API_KEY = env_var("IEXCLOUD_API_KEY", None, required=True)
+
+# Database
 SQLA_DRIVER = env_var("SQLA_DRIVER", "mysql")
 SQLA_ECHO = env_var("SQLA_ECHO", False)
 SQL_HOST = env_var("SQL_HOST", "127.0.0.1")

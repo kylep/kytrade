@@ -17,6 +17,7 @@ any that are available in Canada.
 
 Free includes 150 requests a day, all APIs (!) and their broker integration.
 
+Status: I can't get the token to work, getting 400 errors about bad tokens. Will try later.
 
 ## Alpaca API
 

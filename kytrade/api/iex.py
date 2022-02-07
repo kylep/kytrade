@@ -1,5 +1,9 @@
 """IEXcloud
-IEX Cloud includes up to 15 years of historical end-of-day price, and minute-by-minute price data for the last 30 days.
+IEX Cloud includes up to 15 years of historical end-of-day price, but only if you pay them.
+For free accounts, you only get 5 years.
+
+Minute-by-minute price data exists for the last 30 days.
+
 They charge using a credit system, with the free account having a certain low qty of credits
 """
 import requests

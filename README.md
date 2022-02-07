@@ -86,6 +86,23 @@ ARCHFLAGS="-arch x86_64" pip install -e .
 ```
 
 
+## TWS Python API
+
+IBKR doesn't distrubute the TWS API library on Pypy, so you can't just pip install it from the
+internet.
+
+[Download the library](https://interactivebrokers.github.io/) then unzip it and install it.
+Then you can import the `ibapi` module.
+
+```
+mkdir twsapi
+mv twsapi_macunix.976.01.zip twsapi
+unzip twsapi_macunix.976.01.zip
+cd IBJts/source/pythonclient
+pip install .
+```
+
+
 ## Database
 
 ### Local Database

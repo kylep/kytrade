@@ -7,6 +7,7 @@ from ibapi.client import EClient
 from ibapi.wrapper import EWrapper
 from ibapi.contract import Contract
 from ibapi.ticktype import TickTypeEnum
+from ibapi.common import BarData
 
 
 # TODO: Move these to constants file if I keep them
@@ -30,47 +31,20 @@ class IBapi(EWrapper, EClient):
         print("Error: ", reqId, " ", errorCode, " ", errorString)
 
     def tickPrice(self, reqId, tickType, price, attrib):
-        print(
-            "Tick Price. Ticker Id:",
-            reqId,
-            "tickType:",
-            TickTypeEnum.to_str(tickType),
-            "Price:",
-            price,
-            end=" ",
-        )
+        print(f"Tick Price. Id {reqId} tickType: {TickTypeEnum.to_str(tickType)} Price: {price}")
 
     def tickSize(self, reqId, tickType, size):
-        print(
-            "Tick Size. Ticker Id:",
-            reqId,
-            "tickType:",
-            TickTypeEnum.to_str(tickType),
-            "Size:",
-            size,
-        )
+        print(f"Tick Size. Id: {reqId} tickType {TickTypeEnum.to_str(tickType)} Size: {size}")
 
-    def historicalData(self, reqId, bar):
-        print(
-            "HistoricalData. ",
-            reqId,
-            " Date:",
-            bar.date,
-            "Open:",
-            bar.open,
-            "High:",
-            bar.high,
-            "Low:",
-            bar.low,
-            "Close:",
-            bar.close,
-            "Volume:",
-            bar.volume,
-            "Count:",
-            bar.barCount,
-            "WAP:",
-            bar.average,
-        )
+    def historicalData(self, reqId:int, bar: BarData):
+        print("HistoricalData. ReqId:", reqId, "BarData.", bar)
+
+    def historicalDataEnd(self, reqId: int, start: str, end: str):
+        super().historicalDataEnd(reqId, start, end)
+        print("HistoricalDataEnd. ReqId:", reqId, "from", start, "to", end)
+
+    def historicalDataUpdate(self, reqId: int, bar: BarData):
+        print("HistoricalDataUpdate. ReqId:", reqId, "BarData.", bar)
 
 
 class IbkrNotConnectedError(Exception):
@@ -158,17 +132,23 @@ class IbkrClient:
 
     def stock_historical_data(self, symbol: str):
         """Get the historical data"""
+        # https://interactivebrokers.github.io/tws-api/historical_bars.html
         contract = get_stock_contract(symbol)
+        # reqHistoricalData(
+        #  reqId: int, contract: ibapi.contract.Contract, endDateTime: str, durationStr: str,
+        #  barSizeSetting: str, whatToShow: str, useRTH: int, formatDate: int, keepUpToDate: bool,
+        #  chartOptions: list)
         # RTH is "regular trrade hours"
+        ticker_id = 1
         return self.app.reqHistoricalData(
-            reqId=1,
+            reqId=ticker_id,
             contract=contract,
             endDateTime="",
-            durationStr="1 D",
+            durationStr="1 Y",
             barSizeSetting="1 day",
             whatToShow="MIDPOINT",
             useRTH=0,
             formatDate=1,
-            False,
+            keepUpToDate=False,
             chartOptions=[]
         )

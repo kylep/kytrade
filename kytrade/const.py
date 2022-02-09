@@ -21,7 +21,7 @@ VERSION = "1.0001"
 
 # Upstream API Keys
 # TODO: Pick which ones really matter
-ALPHAVANTAGE_API_KEY = env_var("ALPHAVANTAGE_API_KEY", None, required=True)
+ALPHAVANTAGE_API_KEY = env_var("ALPHAVANTAGE_API_KEY", None, required=False)
 STOCKSHARK_API_KEY = env_var("STOCKSHARK_API_KEY", None, required=False)
 ALPACA_API_KEY_ID = env_var("ALPACA_API_KEY_ID", None, required=False)
 ALPACA_API_KEY_SECRET = env_var("ALPACA_API_KEY_SECRET", None, required=False)

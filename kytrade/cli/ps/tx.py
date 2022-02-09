@@ -43,6 +43,17 @@ def buy_stock(id, ticker, qty, close, comp):
     portfolio.save()
 
 
+@click.option("--cost", "-c",  required=True, help="Max cost of shares")
+@click.option("--ticker", "-t", required=True, help="Stock symbol")
+@click.argument("id")
+@click.command()
+def buy_stock_by_price(id, ticker, cost):
+    """Buy as many shares as can be afforded by price at cost"""
+    portfolio = ps.Portfolio.load(id)
+    portfolio.buy_stock_by_price(ticker, cost)
+    portfolio.save()
+
+
 @click.option("--close/--open", default=False, help="buy at open or close - default: open")
 @click.option("--qty", "-n", required=True, help="Qty to buy")
 @click.option("--ticker", "-t", required=True, help="Stock ticker")
@@ -78,6 +89,7 @@ def withdraw(id, usd):
 
 tx.add_command(_list)
 tx.add_command(buy_stock)
+tx.add_command(buy_stock_by_price)
 tx.add_command(sell_stock)
 tx.add_command(deposit)
 tx.add_command(withdraw)

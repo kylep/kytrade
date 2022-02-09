@@ -1,4 +1,5 @@
 import datetime
+import math
 from sqlalchemy import select, delete, desc, or_
 from sqlalchemy.exc import NoResultFound
 
@@ -190,9 +191,12 @@ class Portfolio:
     def compound_anual_growth_rate(self) -> float:
         """Return the CAGR % of this portfolio"""
         ending_value = self.value_at_close + self.total_withdrawn
-        return calc.compound_anual_growth_rate(
-            begin_value=self.total_deposited, end_value=ending_value, years=self.years_opened
-        )
+        days = []
+        value_attr = "close"
+        return calc.compound_anual_growth_rate(days, value_attr)
+        #
+        #    begin_value=self.total_deposited, end_value=ending_value, years=self.years_opened
+        #)
 
     def deposit(self, value):
         """deposit cash into the portsim"""
@@ -271,6 +275,12 @@ class Portfolio:
             action=action,
         )
         self.orm_stock_transactions.append(transaction)
+
+    def buy_stock_by_price(self, ticker: str, cost: float):
+        """Buy as many stock as can be afforded at given cost"""
+        spot = self.market.get_spot(ticker, self.date)
+        num_shares = math.floor(float(cost) / spot.close)
+        self.buy_stock(ticker, num_shares, at="close")
 
     def buy_stock(self, ticker: str, qty: int, at: str, price=None, comp=False):
         """Add shares and subtract the cost from available cash - exception if overdrawn

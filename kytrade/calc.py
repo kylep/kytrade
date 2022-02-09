@@ -10,6 +10,8 @@ import pdb
 def compound_anual_growth_rate(days: list, value_attr: str) -> float:
     """Return the CAGR computed from given descending-dated days"""
     # https://www.investopedia.com/terms/c/cagr.asp
+    if not days:
+        return 0
     years = (days[0].date - days[-1].date).days / 365.25
     years = round(years, 2)  # floating point math problems
     begin_value = getattr(days[-1], value_attr)
@@ -17,6 +19,7 @@ def compound_anual_growth_rate(days: list, value_attr: str) -> float:
     if begin_value == 0 or years == 0:
         return 0
     return ((end_value / begin_value) ** (1 / years) - 1) * 100
+
 
 def average(values: list):
     """Return the average"""

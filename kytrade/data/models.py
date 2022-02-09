@@ -1,6 +1,6 @@
 """SQL Alchemy models"""
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, String, Integer, Date, Float, UniqueConstraint
+from sqlalchemy import Column, String, Integer, Date, Float, UniqueConstraint, TEXT
 
 # too-few-public-methods is not appropriate in ORM classes
 # pylint: disable=too-few-public-methods
@@ -131,4 +131,23 @@ class ScreenerMetadata(Base):
     __tablename__ = "screener_metadata"
     id = Column(Integer, primary_key=True)
     ticker = Column(String(8))
-    json = Column(String(65535))
+    json = Column(TEXT)
+
+    def __repr__(self):
+        return _gen_repr(self)
+
+
+class Stock(Base):
+    """Stocks
+    Each row represents a tradeable stock/equity, ideally available on the NYSE exchange
+    """
+    __tablename__ = "stocks"
+    __table_args__ = (UniqueConstraint("ticker"),)
+    id = Column(Integer, primary_key=True)
+    ticker = Column(String(8))
+    name = Column(String(512))
+    attributes_json = Column(TEXT)
+    indexes_csv = Column(String(512))
+
+    def __repr__(self):
+        return _gen_repr(self)

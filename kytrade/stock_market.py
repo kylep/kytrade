@@ -1,13 +1,15 @@
 """Stock Market Simulator"""
+import json
 import datetime
 from collections import namedtuple
 
 from sqlalchemy import select, asc, desc, func
 
 from kytrade import calc
-from kytrade.api import alphavantage
+# from kytrade.api import alphavantage
+from kytrade.api import yahoo
 from kytrade.data.db import get_session
-from kytrade.data.models import DailyStockPrice
+from kytrade.data.models import DailyStockPrice, Stock
 
 
 class StockDataNotFound(Exception):
@@ -15,6 +17,7 @@ class StockDataNotFound(Exception):
 
 
 SpotPrice = namedtuple("SpotPrice", "open close")
+INDEXES = ["nasdaq100", "sp500"]
 
 
 class StockMarket:
@@ -51,10 +54,62 @@ class StockMarket:
         ticker_query = select(DailyStockPrice.ticker).distinct()
         return [elem[0] for elem in self.session.execute(ticker_query).all()]
 
+    @property
+    def stocks(self) -> list:
+        """Return a list of saved Stock db entries"""
+        rows = self.session.execute(select(Stock))
+        return [row[0] for row in rows]  # de-tupple
+
     def download_daily_price_history(self, ticker) -> None:
         """Save the ticker data from upstream APIs to the local database"""
-        daily_stock_prices = alphavantage.get_daily_stock_prices(ticker, compact=False)
+        # TODO: Remove, finish deprecating alphavantage (for now, at least)
+        # daily_stock_prices = alphavantage.get_daily_stock_prices(ticker, compact=False)
+        daily_stock_prices = yahoo.get_daily_stock_history(ticker)
         self.session.bulk_save_objects(daily_stock_prices, update_changed_only=True)
+        self.session.commit()
+
+    def load_stocks_from_datahub_file(self, path):
+        """Load a datahub stock export into the 'stocks' table"""
+        index = next((match for match in INDEXES if match in path), None)
+        with open(path, "r") as fil:
+            data = json.load(fil)
+        for entry in data:
+            symbol = entry["Symbol"]
+            entry.pop("Symbol", None)
+            name = "?"
+            for name_attr in ["Name", "Company Name"]:
+                if name_attr in entry:
+                    name = entry[name_attr]
+                    entry.pop(name_attr, None)  # removes it from metadata/attribute_json
+                    break
+            for spam_attr in ["Security Name", "Round Lot Size", "Test Issue"]:
+                entry.pop(spam_attr, None)  # spam attributes add no value
+            attributes_json = json.dumps(entry)
+            stock = Stock(ticker=symbol, name=name, attributes_json=attributes_json, indexes_csv=index)
+            query = select(Stock).where(Stock.ticker == symbol)
+            row  = self.session.execute(query).one_or_none()
+            if row:
+                # If the stock already exists in the db...
+                db_stock = row[0]
+                stock_indexes = db_stock.indexes_csv.split(",")
+                update = False
+                if index not in stock_indexes:
+                    # check if this is a different index and update the index csv string
+                    stock_indexes.append(index)
+                    db_stock.indexes_csv = ",".join(stock_indexes)
+                    update = True
+                if attributes_json != db_stock.attributes_json:
+                    # also check if there's another other metadata about this stock and add it
+                    update = True
+                    stock_attrs = json.loads(attributes_json)
+                    db_stock_attrs = json.loads(db_stock.attributes_json)
+                    for key in stock_attrs:
+                        db_stock_attrs[key] = stock_attrs[key]
+                    db_stock.attributes_json = json.dumps(db_stock_attrs)
+                if update:
+                    self.session.add(db_stock)
+            else:
+                self.session.add(stock)
         self.session.commit()
 
     def select_daily_price(self, ticker=None, from_date=None, limit=0, lazy_load=True) -> list:

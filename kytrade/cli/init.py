@@ -1,5 +1,6 @@
 """ Initialization commands """
 import click
+
 from kytrade.data.db import init_create_tables
 
 

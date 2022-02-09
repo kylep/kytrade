@@ -149,15 +149,35 @@ kt init database-tables
 
 Save up to 20 yrs of history for a given ticker to the database - example SPY
 ```
-kt download daily-stock-prices SPY
+kt sm download-daily-stock-prices SPY
 ```
 
+You can populate the stocks list by importing index fund JSON dumps. Some are saved in the git
+checkout under `data/index-funds`
+```
+kt sm load-datahub-stocks data/index-funds/nasdaq100.json
+kt sm load-datahub-stocks data/index-funds/sp500.json
+```
+
+Load historical data for each stock in the database
+```
+bin/download-historical-data.sh
+```
 
 ## Stock Market
 
 The Stock Market stores data outside of portfolios. Currently it stores daily stock prices.
 Operated using `kt sm`, which stands for "kytrade stock market", the StockMarket entity also
 computes various metadata about each tracked stock.
+
+List all of the stocks that the Stock Market knows about:
+```
+kt sm list-stocks
+
+# For bash scripting, you can filter to the tickers:
+kt sm list-stocks --symbols
+```
+
 
 Download the price history for a given ticker
 ```

@@ -26,7 +26,7 @@ STOCKSHARK_API_KEY = env_var("STOCKSHARK_API_KEY", None, required=False)
 ALPACA_API_KEY_ID = env_var("ALPACA_API_KEY_ID", None, required=False)
 ALPACA_API_KEY_SECRET = env_var("ALPACA_API_KEY_SECRET", None, required=False)
 ALPACA_API_ENDPOINT = env_var("ALPACA_API_ENDPOINT", "https://paper-api.alpaca.markets")
-IEXCLOUD_API_KEY = env_var("IEXCLOUD_API_KEY", None, required=True)
+IEXCLOUD_API_KEY = env_var("IEXCLOUD_API_KEY", None, required=False)
 
 # Database
 SQLA_DRIVER = env_var("SQLA_DRIVER", "mysql")

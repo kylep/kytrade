@@ -66,6 +66,10 @@ adjusted for splits and such. It's just that hard to get working.
 
 I've tried downloading other people's scripts to see how they work, and they don't either.
 
+I tried a 3rd party library and it does seem to work, only to find that their data is not old
+enough for my backtesting. I think I'll buy a month of another service, get their old data, then
+cancel it and just take good care of my database.
+
 
 ## QuesTrade API
 
@@ -73,3 +77,15 @@ With the exception of ETFs, Questrade's fees are really high compared to IBKR. H
 I might be able to get useful historical data from them.
 
 
+## EODHistoricalData
+
+[these guys](https://eodhistoricaldata.com/) seem to have some pretty old data, like Ford back to
+the 1970's. Originally I'd hoped I could get stuff right through the 1900's but anything before
+around the year 2000 is hard to find. I haven't tried them out yet but their prices seem pretty
+normal.
+
+
+## Yahoo Finance
+
+So, I keep reading that they have discontinued their APIs and you can't use Yahoo Finance any more,
+yet there are libraries out there and their data seems to go way back. Tempting!

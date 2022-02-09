@@ -17,7 +17,8 @@ setup(
         "Click",
         "beautifultable",
         "gmpy2",
-        "ib_insync"
+        "ib_insync",
+        "yfinance"
     ],
     entry_points={"console_scripts": ["kt = kytrade.cli.main:shell"]},
 )

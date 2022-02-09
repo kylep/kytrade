@@ -140,6 +140,9 @@ class IbkrClient:
         #  chartOptions: list)
         # RTH is "regular trrade hours"
         ticker_id = 1
+        # reqHeadTimeStamp(
+        #  reqId: int, contract: ibapi.contract.Contract, whatToShow: str, useRTH: int,
+        #  formatDate: int)
         return self.app.reqHistoricalData(
             reqId=ticker_id,
             contract=contract,

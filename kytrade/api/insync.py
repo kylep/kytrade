@@ -17,19 +17,20 @@ def download_daily_stock_history(symbol: str, exchange="NYSE", currency="USD", c
     Returns data in a weird list of lists with maybe some duplicates at the end or smth ¯\_(ツ)_/¯
     """
     ib = IB()
-    ib.connect('127.0.0.1', PAPER_PORT, clientId=client_id, readonly=READ_ONLY)
+    ib.connect("127.0.0.1", PAPER_PORT, clientId=client_id, readonly=READ_ONLY)
     contract = Stock(symbol, exchange, currency)
-    datestamp = ''
+    datestamp = ""
     bars_list = []
     while True:
         bars = ib.reqHistoricalData(
             contract,
             endDateTime=datestamp,
-            durationStr='1 Y',
-            barSizeSetting='1 day',
-            whatToShow='MIDPOINT',
+            durationStr="1 Y",
+            barSizeSetting="1 day",
+            whatToShow="MIDPOINT",
             useRTH=True,
-            formatDate=1)
+            formatDate=1,
+        )
         if not bars:
             break
         bars_list.append(bars)

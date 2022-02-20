@@ -6,6 +6,7 @@ from collections import namedtuple
 from sqlalchemy import select, asc, desc, func
 
 from kytrade import calc
+
 # from kytrade.api import alphavantage
 from kytrade.api import yahoo
 from kytrade.data.db import get_session
@@ -85,9 +86,11 @@ class StockMarket:
             for spam_attr in ["Security Name", "Round Lot Size", "Test Issue"]:
                 entry.pop(spam_attr, None)  # spam attributes add no value
             attributes_json = json.dumps(entry)
-            stock = Stock(ticker=symbol, name=name, attributes_json=attributes_json, indexes_csv=index)
+            stock = Stock(
+                ticker=symbol, name=name, attributes_json=attributes_json, indexes_csv=index
+            )
             query = select(Stock).where(Stock.ticker == symbol)
-            row  = self.session.execute(query).one_or_none()
+            row = self.session.execute(query).one_or_none()
             if row:
                 # If the stock already exists in the db...
                 db_stock = row[0]

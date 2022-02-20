@@ -1,3 +1,6 @@
+""" OLD Portfolio Simulator"""
+
+
 import datetime
 import math
 from sqlalchemy import select, delete, desc, or_
@@ -34,8 +37,7 @@ class Portfolio:
         self.orm_stock_transactions = []  # list of PortSimStockTransaction objects
         self.orm_cash_operations = []  # list of PortSimCashOperation objects
         self.orm_value_history = []  # list of PortfolioSimulatorBalanceHistoryDay objects
-        self.on_open = []  # list of Strategy's to execute on market open
-        self.on_close = []  # ...to execute on market close
+        self.strategies = []
 
     @staticmethod
     def load(name_or_id):
@@ -196,7 +198,7 @@ class Portfolio:
         return calc.compound_anual_growth_rate(days, value_attr)
         #
         #    begin_value=self.total_deposited, end_value=ending_value, years=self.years_opened
-        #)
+        # )
 
     def deposit(self, value):
         """deposit cash into the portsim"""
@@ -234,7 +236,9 @@ class Portfolio:
                 f"{self.date} "
                 f"ROI={self.return_on_investment:.2f}% "
                 f"CAGR={self.compound_anual_growth_rate:.2f}%"
-                f"{space}", end="\r")
+                f"{space}",
+                end="\r",
+            )
 
     def advance_to_date(self, date: str = None, print_status: bool = False):
         """Advance the date one day, or to the given date YYYY-MM-DD"""

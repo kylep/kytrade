@@ -36,7 +36,7 @@ class IBapi(EWrapper, EClient):
     def tickSize(self, reqId, tickType, size):
         print(f"Tick Size. Id: {reqId} tickType {TickTypeEnum.to_str(tickType)} Size: {size}")
 
-    def historicalData(self, reqId:int, bar: BarData):
+    def historicalData(self, reqId: int, bar: BarData):
         print("HistoricalData. ReqId:", reqId, "BarData.", bar)
 
     def historicalDataEnd(self, reqId: int, start: str, end: str):
@@ -110,7 +110,7 @@ class IbkrClient:
 
     def stock_streaming_mkt_price(self, symbol: str):
         """Use the IBKR Contract object to get the current price of a stock
-           I'm really not sure what's up with this, its entirely unclear how to use it
+        I'm really not sure what's up with this, its entirely unclear how to use it
         """
         contract = get_stock_contract(symbol)
         ticker_id = 1  # unique value, returned market data is identified by ticker_id
@@ -153,5 +153,5 @@ class IbkrClient:
             useRTH=0,
             formatDate=1,
             keepUpToDate=False,
-            chartOptions=[]
+            chartOptions=[],
         )

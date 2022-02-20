@@ -54,7 +54,7 @@ def bollinger_bands(values: list) -> dict:
 
 def indexed_min(values: list) -> tuple:
     """Return tupple (min value, list index)
-       Using the .index() approach after min() can return the wrong index when there're duplicates
+    Using the .index() approach after min() can return the wrong index when there're duplicates
     """
     minval = (values[0], 0)
     for i, value in enumerate(values):
@@ -65,7 +65,7 @@ def indexed_min(values: list) -> tuple:
 
 def indexed_max(values: list) -> tuple:
     """Return tupple (max value, list index)
-       Using the .index() approach after max() can return the wrong index when there're duplicates
+    Using the .index() approach after max() can return the wrong index when there're duplicates
     """
     maxval = (values[0], 0)
     for i, value in enumerate(values):
@@ -110,7 +110,7 @@ def max_drawdown(days: list, value_attr: str) -> dict:
             "trough": trough,
             "trough_date": trough_date,
             "ratio": ratio,
-            "percent": (ratio* -100),
+            "percent": (ratio * -100),
             "absolute": (peak - trough),
         }
         if not ret or mdd["ratio"] < ret["ratio"]:
@@ -142,5 +142,5 @@ def get_metadata(days: list, value_attr: str):
         "200_day_standard_deviation": standard_deviation(values[:200]),
         "all_time_standard_deviation": standard_deviation(values),
         "20d_bollinger_band": bollinger_bands(values[:20]),
-        "max_drawdown": max_drawdown(days, value_attr)
+        "max_drawdown": max_drawdown(days, value_attr),
     }

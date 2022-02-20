@@ -60,7 +60,6 @@ def describe(ticker):
     pprint(meta)
 
 
-
 @click.argument("ticker")
 @click.command()
 def download_daily_stock_prices(ticker):
@@ -118,14 +117,8 @@ def list_stocks(symbols):
         "Metadata",
     ]
     for stock in stocks:
-        table.rows.append([
-            stock.ticker,
-            stock.name,
-            stock.indexes_csv,
-            stock.attributes_json
-        ])
+        table.rows.append([stock.ticker, stock.name, stock.indexes_csv, stock.attributes_json])
     click.echo(table)
-
 
 
 sm.add_command(download_daily_stock_prices)

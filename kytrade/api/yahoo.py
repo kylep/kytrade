@@ -8,9 +8,8 @@ from kytrade.data.models import DailyStockPrice
 
 
 def get_daily_stock_history(symbol: str) -> list:
-    """Use yahoo finance to download daily stock data
-    """
-    start = datetime.datetime(1900,1,1)
+    """Use yahoo finance to download daily stock data"""
+    start = datetime.datetime(1900, 1, 1)
     end = datetime.date.today()
     daily_stock_prices = []
     df = yfinance.download(symbol, start=start, end=end, progress=False)
@@ -23,7 +22,7 @@ def get_daily_stock_history(symbol: str) -> list:
             close=stock["Close"],
             high=stock["High"],
             low=stock["Low"],
-            volume=stock["Volume"]
+            volume=stock["Volume"],
         )
         daily_stock_prices.append(daily_stock_price)
     return daily_stock_prices

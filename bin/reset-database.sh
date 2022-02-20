@@ -11,5 +11,5 @@ docker exec -it kytrade-sql mysql -u root -p$SQL_PASS -e "DROP DATABASE trade;"
 docker exec -it kytrade-sql mysql -u root -p$SQL_PASS -e "CREATE DATABASE trade;"
 
 kt init database-tables
-kt sm load-datahub-stocks data/index-funds/nasdaq100.json
-kt sm load-datahub-stocks data/index-funds/sp500.json
+#kt sm load-datahub-stocks data/index-funds/nasdaq100.json
+#kt sm load-datahub-stocks data/index-funds/sp500.json

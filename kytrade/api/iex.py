@@ -22,8 +22,10 @@ def get_daily_history(ticker: str):
     """Query the daily history of a stock"""
     url = f"{BASE_URL}/...?token={IEXCLOUD_API_KEY}"
 
-def balance_sheet()
+
+def balance_sheet():
     return "/stock/{symbol}/balance-sheet/{last}/{field}"
+
 
 def quote(ticker: str):
     url = f"{BASE_URL}/stock/{ticker}/quote?token={IEXCLOUD_API_KEY}"
@@ -31,6 +33,7 @@ def quote(ticker: str):
     if resp.status_code == 402:
         raise FuckYouPayMeError(f"iex.quote: {resp.content.decode('ascii')}")
     return resp.json()
+
 
 def financials(ticker: str):
     """get yearly fiancials"""

@@ -2,6 +2,7 @@
 import sqlalchemy
 from sqlalchemy.orm import Session
 from pandas.core.frame import DataFrame
+from sqlalchemy.orm.attributes import flag_modified
 
 from kytrade import const
 from kytrade.data import models
@@ -28,7 +29,7 @@ def init_create_tables():
 
 def get_session() -> Session:
     """Get a session for this engine"""
-    return Session(engine)
+    return Session(bind=engine, expire_on_commit=False)
 
 
 def save_dataframe(orm_model: models.Base, df: DataFrame) -> None:
@@ -42,3 +43,44 @@ def save_dataframe(orm_model: models.Base, df: DataFrame) -> None:
         if_exists="append",
         method="multi",
     )
+
+
+def commit(orm_object):
+    """Commit an ORM object"""
+    session = Session.object_session(orm_object)
+    if not session:
+        session = get_session()
+        session.add(orm_object)
+    session.commit()
+
+
+def delete(orm_object):
+    """Delete an ORM object"""
+    session = Session.object_session(orm_object)
+    session.delete(orm_object)
+    session.commit()
+
+
+def get_document(name: str) -> dict:
+    """Get a document's data else {}"""
+    query = sqlalchemy.select(models.Document).where(models.Document.name == name)
+    session = get_session()
+    result = session.execute(query).one_or_none()
+    if result:
+        return result[0].data
+    return {}
+
+
+def set_document(name: str, data: dict) -> None:
+    """Write a document's data"""
+    session = get_session()
+    select_query = sqlalchemy.select(models.Document).where(models.Document.name == name)
+    select_result = session.execute(select_query).one_or_none()
+    if select_result:
+        document = select_result[0]
+        document.data = data
+    else:
+        document = models.Document(name=name, data=data)
+    session.add(document)
+    session.commit()
+

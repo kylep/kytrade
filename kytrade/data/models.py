@@ -1,6 +1,6 @@
 """SQL Alchemy models"""
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, String, Integer, Date, Float, UniqueConstraint, TEXT
+from sqlalchemy import Column, String, Integer, Date, Float, UniqueConstraint, TEXT, JSON
 
 # too-few-public-methods is not appropriate in ORM classes
 # pylint: disable=too-few-public-methods
@@ -11,7 +11,7 @@ Base = declarative_base()
 
 def _gen_repr(clazz):
     """Print a usable constructor as the model representation - helps with troubleshooting"""
-    keys = [key for key in clazz.__dict__.keys() if not key.startswith("_")]
+    keys = [key for key in clazz.__dict__.keys() if (not key.startswith("_") and key != "metad")]
     val_str = ", ".join([f"{key}={getattr(clazz, key)!r}" for key in keys])
     return f"{clazz.__class__.__name__}({val_str})"
 
@@ -34,6 +34,18 @@ class DailyStockPrice(Base):
         return _gen_repr(self)
 
 
+class Portfolio(Base):
+    """Portfolio Simulator"""
+
+    __tablename__ = "portfolios"
+    __table_args__ = (UniqueConstraint("name"),)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(256))
+    date = Column(Date)
+    data = Column(JSON)
+
+    def __repr__(self):
+        return _gen_repr(self)
 
 
 class PortfolioSimulator(Base):
@@ -42,17 +54,10 @@ class PortfolioSimulator(Base):
     __tablename__ = "portfolio_simulators"
     __table_args__ = (UniqueConstraint("name"),)
     id = Column(Integer, primary_key=True)
-    name = Column(
-        String(256),
-    )
+    name = Column(String(256))
     opened = Column(Date)
     date = Column(Date)
     usd = Column(Float)
-    # all_time_high = Column(Float)
-    # all_time_low = Column(Float)
-    # max_drawdown = Column(Float)
-    # next up:
-    # variance = Column(Float)
 
     def __repr__(self):
         return _gen_repr(self)
@@ -125,6 +130,7 @@ class ScreenerMetadata(Base):
     """Screener Metadata
     Calculating the metadata can take a while so its better to not have to do it every day
     """
+
     #
     # NOTE: for now i'd really rather have a noSQL db for this since I have no idea what metadat
     # i actually want. I'll just store the data
@@ -141,6 +147,7 @@ class Stock(Base):
     """Stocks
     Each row represents a tradeable stock/equity, ideally available on the NYSE exchange
     """
+
     __tablename__ = "stocks"
     __table_args__ = (UniqueConstraint("ticker"),)
     id = Column(Integer, primary_key=True)
@@ -151,3 +158,79 @@ class Stock(Base):
 
     def __repr__(self):
         return _gen_repr(self)
+
+
+# ############################################################################################### #
+# ############################################################################################### #
+# ############################################################################################### #
+# ############################################################################################### #
+# ############################################################################################### #
+# NOTE: See, now this is why relational databases are a pain in the ass. Why do I need to have
+# THIS many tables!?? Screw it, I'm pretending this is a document store for everything that does
+# not need thousands of records!
+
+
+class Document(Base):
+    """Documents"""
+
+    __tablename__ = "documents"
+    __table_args__ = (UniqueConstraint("name"),)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(512))
+    data = Column(JSON)
+
+# ############################################################################################### #
+# ############################################################################################### #
+# ############################################################################################### #
+# ############################################################################################### #
+
+class Strategy(Base):
+    """Portfolio simulator strategy"""
+
+    __tablename__ = "strategies"
+    __table_args__ = (UniqueConstraint("name"),)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(512))
+    description = Column(TEXT)
+
+
+class StrategyCondition(Base):
+    """Portfolio simulator strategy condition"""
+
+    __tablename__ = "strategy_conditions"
+    __table_args__ = (UniqueConstraint("name"),)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(512))
+    condition_type = Column(String(512))
+    args = Column(TEXT)
+
+
+class StrategyAction(Base):
+    """Portfolio simulator strategy action"""
+
+    __tablename__ = "strategy_actions"
+    __table_args__ = (UniqueConstraint("name"),)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(512))
+    action_type = Column(String(512))
+    args = Column(TEXT)
+
+
+class StrategyLink(Base):
+    """Portfolio simulator strategy link"""
+
+    __tablename__ = "strategy_links"
+    id = Column(Integer, primary_key=True)
+    strategy_id = Column(Integer)
+    condition_id = Column(Integer)
+    action_id = Column(Integer)
+
+
+class PortfolioStrategyBinding(Base):
+    """Used to link strategies to portfolios"""
+
+    __tablename__ = "portfolio_strategy_bindings"
+    id = Column(Integer, primary_key=True)
+    strategy_id = Column(Integer)
+    portfolio_id = Column(Integer)
+

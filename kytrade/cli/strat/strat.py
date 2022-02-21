@@ -58,11 +58,8 @@ def add_conditional_action(name, condition, action):
     condition_mapping = strategy.condition_mapping(condition, actions)
     db_strategy["conditions"].append(condition_mapping)
     strategy.set_strategy(
-        name,
-        condition_mappings=db_strategy["conditions"],
-        description=db_strategy["description"]
+        name, condition_mappings=db_strategy["conditions"], description=db_strategy["description"]
     )
-
 
 
 strat.add_command(_list)

@@ -7,6 +7,7 @@ from kytrade.data import db
 from kytrade.stock_market import StockMarket
 from kytrade.ps.enums import CashOperationAction
 from kytrade.ps import portfolio as ps
+from kytrade import const
 
 
 def modify_cash(portfolio: models.Portfolio, delta: float, subtract: bool = False) -> None:
@@ -53,6 +54,14 @@ def remove_stock(portfolio: models.Portfolio, symbol: str, qty: int) -> None:
     portfolio.data["stock_positions"][symbol] = new_qty
 
 
+def pay_brokerage_stock_comission(portfolio: models.Portfolio) -> None:
+    """Pay the comission to the brokerage - discourages frequent low-profit trading"""
+    new_val = portfolio["data"]["cash"] - const.TX_BROKERAGE_COMISSION
+    if new_val < 0:
+        raise exc.InsufficientFundsError(f"Can't afford commission on this trade")
+    portfolio["data"]["cash"] = new_val
+
+
 def buy_stock(portfolio: models.Portfolio, symbol: str, qty: int, comp: bool = False) -> None:
     """Buy stock in the given portfolio"""
     sm = StockMarket()
@@ -63,6 +72,7 @@ def buy_stock(portfolio: models.Portfolio, symbol: str, qty: int, comp: bool = F
     modify_cash(portfolio, total_price, subtract=True)
     add_stock(portfolio, symbol, qty)
     ps.log_stock_transaction(portfolio, symbol, qty, unit_price, ps.TransactionAction.BUY)
+    pay_brokerage_stock_comission(portfolio)
 
 
 def sell_stock(portfolio: models.Portfolio, symbol: str, qty: int) -> None:
@@ -73,6 +83,7 @@ def sell_stock(portfolio: models.Portfolio, symbol: str, qty: int) -> None:
     remove_stock(portfolio, symbol, qty)
     modify_cash(portfolio, total_price)
     ps.log_stock_transaction(portfolio, symbol, qty, unit_price, ps.TransactionAction.SELL)
+    pay_brokerage_stock_comission(portfolio)
 
 
 def buy_stock_by_cost(portfolio: models.Portfolio, symbol: str, cost: float) -> None:

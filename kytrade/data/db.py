@@ -83,4 +83,3 @@ def set_document(name: str, data: dict) -> None:
         document = models.Document(name=name, data=data)
     session.add(document)
     session.commit()
-

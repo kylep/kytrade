@@ -18,7 +18,9 @@ def _list():
     table.set_style(BeautifulTable.STYLE_MARKDOWN)
     table.columns.header = ["Name", "Type", "Args"]
     for condition_name in conditions:
-        table.rows.append([condition_name, conditions[condition_name]["type"], conditions[condition_name]["args"]])
+        table.rows.append(
+            [condition_name, conditions[condition_name]["type"], conditions[condition_name]["args"]]
+        )
     click.echo(table)
 
 

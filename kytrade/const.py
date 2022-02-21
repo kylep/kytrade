@@ -36,3 +36,6 @@ SQL_PORT = env_var("SQL_PORT", 3306)
 SQL_USER = env_var("SQL_USER", "root")
 SQL_PASS = env_var("SQL_PASS", None, required=True)
 SQL_DATABASE = env_var("SQL_DATABASE", "trade")
+
+# General settings
+TX_BROKERAGE_COMISSION = env_var("TX_BROKERAGE_COMISSION", 10.00)

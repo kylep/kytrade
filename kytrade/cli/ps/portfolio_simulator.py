@@ -4,6 +4,7 @@ from beautifultable import BeautifulTable, ALIGN_LEFT
 from pprint import pprint
 
 import kytrade.ps.portfolio as ps
+from kytrade.ps import simulator
 from kytrade.cli.ps.tx import tx
 from kytrade.cli.ps.strat import strat
 
@@ -12,16 +13,11 @@ def _get_ps_table(portfolios: list):
     """Print a list of portfolios"""
     table = BeautifulTable(maxwidth=120)
     table.set_style(BeautifulTable.STYLE_MARKDOWN)
-    headers = [
-        "Name",
-        "Start",
-        "End",
-        "Positions"
-    ]
+    headers = ["Name", "Start", "End", "Positions"]
     table.columns.header = headers
     for portfolio in portfolios:
         sp = portfolio.data["stock_positions"]
-        positions = ",".join([f"{key}={sp[key]}" for key in sp.keys() ])
+        positions = ",".join([f"{key}={sp[key]}" for key in sp.keys()])
         row = [
             portfolio.name,
             portfolio.data["date_opened"],
@@ -102,43 +98,26 @@ def delete(name):
     ps.delete_portfolio(name)
 
 
-
 @click.option("--print-status/--no-print-status", default=True, help="Print sim status")
 @click.option("--to-date", "-d", required=False, default=None, help="Advance to date YYYY-MM-DD")
-@click.argument("id")
+@click.argument("name")
 @click.command()
-def advance(id, to_date, print_status):
+def advance(name, to_date, print_status):
     """Advance the ps 1 day or to --to-date"""
-    portfolio = ps.Portfolio.load(id)
+    portfolio = ps.get_portfolio(name)
     if to_date:
-        click.echo(f"Simulating daily activities to {to_date}...")
-        portfolio.advance_to_date(to_date, print_status=print_status)
-        click.echo("")
+        simulator.advance_to_date(portfolio, to_date)
     else:
-        portfolio.advance_one_day()
-    click.echo("Saving....")
-    portfolio.save()
+        simulator.advance_one_day(portfolio)
+    ps.update_portfolio(portfolio)
 
 
-@click.option("--table/--csv", default=True, help="Use --csv to print a CSV")
-@click.argument("id")
+@click.argument("name")
 @click.command()
-def value_history(id, table):
+def value_history(name):
     """Print the balance history"""
-    portfolio = ps.Portfolio.load(id)
-    if table:
-        table = BeautifulTable(maxwidth=80)
-        table.set_style(BeautifulTable.STYLE_MARKDOWN)
-        headers = ["date", "mkt_val", "profit"]
-        table.columns.header = headers
-        for entry in portfolio.value_history:
-            row = [str(entry.date), entry.total_usd, entry.profit_usd]
-            table.rows.append(row)
-        click.echo(table)
-    else:
-        click.echo("date,mkt_val,profit")
-        for entry in portfolio.value_history:
-            click.echo(f"{entry.date},{entry.total_usd},{entry.profit_usd}")
+    portfolio = ps.get_portfolio(name)
+    pprint(portfolio.data["value_history"])
 
 
 portfolio_simulator.add_command(create)

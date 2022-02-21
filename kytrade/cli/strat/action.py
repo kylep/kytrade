@@ -21,6 +21,7 @@ def _list():
         table.rows.append([action_name, actions[action_name]["type"], actions[action_name]["args"]])
     click.echo(table)
 
+
 @click.argument("name")
 @click.command()
 def delete(name):

@@ -41,8 +41,10 @@ place.
 
 ### Open Questions
 
-- What about something more volatile like UPRO?
 - Dividends aren't implemented, how much worse would the cash be once they are?
+- Data didn't include the dot-com crash. I think with huge crashes the cash positions might perform
+  better. Still, betting on a dot-com style crash for your portfolio allocation to pay off doesn't
+  seem like a good plan.
 
 
 ---

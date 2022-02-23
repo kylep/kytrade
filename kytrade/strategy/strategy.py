@@ -79,6 +79,5 @@ def execute_strategy(portfolio: models.Portfolio, strategy_name):
                 action.CACHE[action_name] = actn
             else:
                 actn = action.CACHE[action_name]
-            print(actn)
             action.execute_action(portfolio, actn["type"], actn["args"])
 

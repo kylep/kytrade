@@ -38,14 +38,36 @@ def create():
 
 @click.argument("name")
 @click.command()
+def start_of_day(name):
+    """Create a start-of-day condition"""
+    set_condition(name=name, condition_type="start_of_day", args={})
+
+
+@click.argument("name")
+@click.command()
 def start_of_month(name):
-    """Create a start-of-month condition
-    This type of condition has no arguments, start of month is start of month
-    """
+    """Create a start-of-month condition"""
     set_condition(name=name, condition_type="start_of_month", args={})
 
 
+@click.argument("name")
+@click.command()
+def start_of_quarter(name):
+    """Create a start-of-quarter condition"""
+    set_condition(name=name, condition_type="start_of_quarter", args={})
+
+
+@click.argument("name")
+@click.command()
+def start_of_year(name):
+    """Create a start-of-year condition"""
+    set_condition(name=name, condition_type="start_of_year", args={})
+
+
+create.add_command(start_of_day)
 create.add_command(start_of_month)
+create.add_command(start_of_quarter)
+create.add_command(start_of_year)
 condition.add_command(_list)
 condition.add_command(create)
 condition.add_command(delete)

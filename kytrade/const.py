@@ -38,4 +38,4 @@ SQL_PASS = env_var("SQL_PASS", None, required=True)
 SQL_DATABASE = env_var("SQL_DATABASE", "trade")
 
 # General settings
-TX_BROKERAGE_COMISSION = env_var("TX_BROKERAGE_COMISSION", 10.00)
+TX_BROKERAGE_COMISSION = float(env_var("TX_BROKERAGE_COMISSION", 10.00))

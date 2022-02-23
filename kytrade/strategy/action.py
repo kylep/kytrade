@@ -14,7 +14,8 @@ missmatches seems like a pain in the ass. Maybe refactor but not sure what into.
 """
 from kytrade.data import models
 from kytrade.data.db import get_document, set_document
-from kytrade.exceptions import InvalidStrategyActionName
+from kytrade.exceptions import InvalidStrategyActionName, InvalidTotalPortfolioAllocationPercentage
+from kytrade.ps import tx
 
 
 DOCUMENT = "actions"
@@ -47,10 +48,21 @@ def delete_action(name) -> None:
     set_document(DOCUMENT, db_actions)
 
 
+def _assert_total_alloc_percent(percents: list, target: int) -> None:
+    """Assert the allocation percentage (sum of percents list) equals target else raise exc"""
+    total_percents = sum(percents)
+    if total_percents != target:
+        err = f"{total_percents} != {target}"
+        raise InvalidTotalPortfolioAllocationPercentage(f"{total_percents} != {target}")
+
+
 def rebalance(portfolio: models.Portfolio, cash: float = 0, stocks: dict = {}):
     """Rebalance at best effort to given percentage allocations"""
-    print(f"CASH: {cash}")
-    print(f"STOCKS: {stocks}")
+    percents_list = [float(cash)] + [float(v) for k,v in stocks.items()]
+    _assert_total_alloc_percent(percents_list, 100)
+    for symbol in stocks:
+        percent = stocks[symbol]
+        tx.rebalance_stock_position(portfolio, symbol, percent)
 
 
 def execute_action(portfolio: models.Portfolio, action_name: str, args: dict = {}) -> None:

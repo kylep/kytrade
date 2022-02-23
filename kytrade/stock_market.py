@@ -3,7 +3,7 @@ import json
 import datetime
 from collections import namedtuple
 
-from sqlalchemy import select, asc, desc, func
+from sqlalchemy import select, asc, desc, func, delete
 
 from kytrade import calc
 
@@ -63,10 +63,10 @@ class StockMarket:
 
     def download_daily_price_history(self, ticker) -> None:
         """Save the ticker data from upstream APIs to the local database"""
-        # TODO: Remove, finish deprecating alphavantage (for now, at least)
-        # daily_stock_prices = alphavantage.get_daily_stock_prices(ticker, compact=False)
         daily_stock_prices = yahoo.get_daily_stock_history(ticker)
-        self.session.bulk_save_objects(daily_stock_prices, update_changed_only=True)
+        delete_query = delete(DailyStockPrice).where(DailyStockPrice.ticker == ticker)
+        self.session.execute(delete_query)
+        self.session.bulk_save_objects(daily_stock_prices, update_changed_only=False)
         self.session.commit()
 
     def load_stocks_from_datahub_file(self, path):

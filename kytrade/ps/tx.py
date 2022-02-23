@@ -7,6 +7,7 @@ from kytrade.data import db
 from kytrade.stock_market import StockMarket
 from kytrade.ps.enums import CashOperationAction
 from kytrade.ps import portfolio as ps
+from kytrade.ps import metadata
 from kytrade import const
 
 
@@ -56,10 +57,10 @@ def remove_stock(portfolio: models.Portfolio, symbol: str, qty: int) -> None:
 
 def pay_brokerage_stock_comission(portfolio: models.Portfolio) -> None:
     """Pay the comission to the brokerage - discourages frequent low-profit trading"""
-    new_val = portfolio["data"]["cash"] - const.TX_BROKERAGE_COMISSION
+    new_val = portfolio.data["cash"] - const.TX_BROKERAGE_COMISSION
     if new_val < 0:
         raise exc.InsufficientFundsError(f"Can't afford commission on this trade")
-    portfolio["data"]["cash"] = new_val
+    portfolio.data["cash"] = new_val
 
 
 def buy_stock(portfolio: models.Portfolio, symbol: str, qty: int, comp: bool = False) -> None:
@@ -88,9 +89,10 @@ def sell_stock(portfolio: models.Portfolio, symbol: str, qty: int) -> None:
 
 def buy_stock_by_cost(portfolio: models.Portfolio, symbol: str, cost: float) -> None:
     """Buy as many stock as can be afforded at a given cost - no factional shares"""
+    cost_after_comission = cost - const.TX_BROKERAGE_COMISSION
     sm = StockMarket()
     unit_price = sm.get_spot(symbol, portfolio.date).close
-    qty = math.floor(cost / unit_price)
+    qty = math.floor(cost_after_comission / unit_price)
     buy_stock(portfolio, symbol, qty)
 
 
@@ -100,3 +102,22 @@ def sell_stock_by_cost(portfolio: models.Portfolio, symbol: str, cost: float) ->
     unit_price = sm.get_spot(symbol, portfolio.date).close
     qty = math.ceil(cost / unit_price)
     sell_stock(portfolio, symbol, qty)
+
+
+def rebalance_stock_position(portfolio: models.Portfolio, symbol: str, percent: float):
+    """Buy or sell stock so it makes up percent of portfolio value"""
+    ps_value = metadata.total_value(portfolio)
+    sm = StockMarket()
+    unit_price = sm.get_spot(symbol, portfolio.date).close
+    multiplier = float(percent) / 100  # Click can pass percent as a str
+    required_shares = math.ceil(ps_value * multiplier / unit_price)
+    if symbol in portfolio.data["stock_positions"]:
+        current_qty = portfolio.data["stock_positions"][symbol]
+    else:
+        current_qty = 0
+    if required_shares > current_qty:
+        qty = required_shares - current_qty
+        buy_stock(portfolio, symbol, qty)
+    elif required_shares < current_qty:
+        qty = current_qty - required_shares
+        sell_stock(portfolio, symbol, qty)

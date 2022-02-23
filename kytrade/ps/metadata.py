@@ -1,8 +1,21 @@
 """Derived portfolio data - metadata"""
+import datetime
+from collections import namedtuple
+
 from kytrade.data import models
 from kytrade.stock_market import StockMarket
 from kytrade.ps.enums import CashOperationAction
 
+
+def value_days_history_named_tuples(portfolio: models.Portfolio) -> list:
+    """Return a list of ValueDay tupple objects representing the value history"""
+    days = []
+    # This named tupple is used for consistency with the StockMarket days entries
+    ValueDay = namedtuple("ValueDay", "date total")
+    for date, data in portfolio.data["value_history"].items():
+        date_dt = datetime.date.fromisoformat(date)
+        days.append(ValueDay(date_dt, data["total_usd"]))
+    return days
 
 def total_value(portfolio: models.Portfolio) -> float:
     """Return the value of all stocks + cash in given portfolio"""
@@ -36,3 +49,4 @@ def total_withdrawn(portfolio: models.Portfolio) -> float:
 def profit(portfolio: models.Portfolio) -> float:
     """Return the total_value plus total withdrawn minus total deposited"""
     return total_value(portfolio) + total_withdrawn(portfolio) - total_withdrawn(portfolio)
+

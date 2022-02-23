@@ -20,6 +20,11 @@ def _list(name):
     """List the transactions"""
     portfolio = ps.get_portfolio(name)
     pprint(portfolio.data["stock_transactions"])
+    for tx in portfolio.data["stock_transactions"]:
+        buy = f"{tx['date']} - {tx['action']} {tx['qty']} {tx['symbol']}"
+        total = float(tx['unit_price']) * float(tx['qty'])
+        deets = f"@ ${tx['unit_price']:,.2f} for ${total:,.2f}"
+        click.echo(f"{buy} {deets}")
 
 
 @click.option("--comp/--no-comp", default=False, help="--comp for free shares")

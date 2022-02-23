@@ -43,15 +43,36 @@ def delete_condition(name) -> None:
     set_document(DOCUMENT, db_conditions)
 
 
+def start_of_day(portfolio):
+    """Start of day condition"""
+    return True  # We only work with daily conditions rn
+
+
 def start_of_month(portfolio):
     """Start of Month condition"""
     return portfolio.date.day == 1
 
 
+def start_of_quarter(portfolio):
+    """Start of quarter condition"""
+    return (portfolio.date.month % 3 == 0 and portfolio.date.day == 1)
+
+
+def start_of_year(portfolio):
+    """Start of year condition"""
+    return (portfolio.date.month == 1 and portfolio.date.day == 1)
+
+
 def check_condition(portfolio: models.Portfolio, condition_name: str, args: dict = {}) -> bool:
     """Execute a condition function and return if it passes"""
     # maybe use a dict or enum with values as the functions for this kinda like a switch?
-    if condition_name == "start_of_month":
+    if condition_name == "start_of_day":
+        return start_of_day(portfolio)
+    elif condition_name == "start_of_month":
         return start_of_month(portfolio)
+    elif condition_name == "start_of_quarter":
+        return start_of_quarter(portfolio)
+    elif condition_name == "start_of_year":
+        return start_of_year(portfolio)
     else:
         raise InvalidStrategyConditionName(condition_name)

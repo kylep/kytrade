@@ -37,6 +37,7 @@ metad:
 }
 
 """
+# TODO: remove date_opened, value_history's first entry covers it
 import datetime
 from sqlalchemy import select, delete, desc, or_
 from sqlalchemy.orm.attributes import flag_modified

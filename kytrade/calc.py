@@ -79,9 +79,20 @@ def max_drawdown(days: list, value_attr: str) -> dict:
     Return dict with keys: peak, peak_date, trough, trough_date, ratio, absolute
     """
     # This approach is a bit harder to read but lowers the average compute time from ~ 15.5 to 2.5s
+    if not days:
+        return {
+            "peak": 0,
+            "peak_date": "",
+            "trough": 0,
+            "trough_date": "",
+            "ratio": 0,
+            "percent": 0,
+            "absolute": 0,
+        }
     reversed_days = days.copy()  # days is passed by reference, don't want to reverse the original
     ret = None
     reversed_days.reverse()
+    assert (days[0].date > days[-1].date), "MDD expected chronologically descending order"
     values = [getattr(day, value_attr) for day in reversed_days]  # (list order is preserved)
     index = 0
     peak = values[0]

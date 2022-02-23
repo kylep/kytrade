@@ -1,9 +1,12 @@
 """ portfoliocommands """
 import click
+import datetime
 from beautifultable import BeautifulTable, ALIGN_LEFT
 from pprint import pprint
 
 import kytrade.ps.portfolio as ps
+from kytrade import calc
+from kytrade.ps import metadata
 from kytrade.ps import simulator
 from kytrade.cli.ps.tx import tx
 from kytrade.cli.ps.strat import strat
@@ -13,16 +16,25 @@ def _get_ps_table(portfolios: list):
     """Print a list of portfolios"""
     table = BeautifulTable(maxwidth=120)
     table.set_style(BeautifulTable.STYLE_MARKDOWN)
-    headers = ["Name", "Start", "End", "Positions"]
+    headers = ["Name", "Start", "End", "Positions", "Cash", "Value", "CAGR %", "MDD %"]
     table.columns.header = headers
     for portfolio in portfolios:
+        print(f" CALC: {portfolio.name}                           ", end='\r')
         sp = portfolio.data["stock_positions"]
         positions = ",".join([f"{key}={sp[key]}" for key in sp.keys()])
+        value_days = metadata.value_days_history_named_tuples(portfolio)
+        cagr = calc.compound_anual_growth_rate(value_days, value_attr="total")
+        value_days.reverse()  # TODO: Why do I need that?
+        mdd = calc.max_drawdown(value_days, value_attr="total")
         row = [
             portfolio.name,
             portfolio.data["date_opened"],
             str(portfolio.date),
             positions,
+            f"${portfolio.data['cash']:,.2f}",
+            f"${metadata.total_value(portfolio):,.2f}",
+            f"{cagr:.2f}",
+            f"{mdd['percent']:.2f}"
         ]
         table.rows.append(row)
     return table

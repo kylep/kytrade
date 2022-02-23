@@ -1,5 +1,6 @@
 """ Stock Market (sm) commands """
 import click
+import json
 from pprint import pprint
 from beautifultable import BeautifulTable, ALIGN_LEFT
 
@@ -56,8 +57,7 @@ def screener():
 def describe(ticker):
     sm = StockMarket()
     meta = sm.get_metadata(ticker)
-    click.echo(ticker)
-    pprint(meta)
+    click.echo(json.dumps(meta, indent=2, default=str))
 
 
 @click.argument("ticker")

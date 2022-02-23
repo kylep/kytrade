@@ -55,13 +55,18 @@ def create(name, date):
     table = _get_ps_table([portfolio])
     click.echo(table)
 
-
+@click.option("--details/--names", default=True, help="Use --names to only print names")
 @click.command(name="list")
-def _list():
+def _list(details):
     """list instances"""
     portfolios = ps.list_portfolios()
-    table = _get_ps_table(portfolios)
-    click.echo(table)
+    if details:
+        table = _get_ps_table(portfolios)
+        click.echo(table)
+        return
+    for portfolio in portfolios:
+        click.echo(portfolio.name)
+
 
 
 @click.argument("name")

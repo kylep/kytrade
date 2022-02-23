@@ -2,7 +2,6 @@
 import datetime
 import kytrade.ps.portfolio as ps
 from kytrade.data import models
-from kytrade.ps import metadata
 from kytrade.strategy import strategy
 
 
@@ -26,7 +25,6 @@ def advance_one_day(portfolio: models.Portfolio) -> None:
         strategy.execute_strategy(portfolio, strategy_name)
 
 
-
 def advance_to_date(portfolio: models.Portfolio, date: str) -> None:
     """Advance to the given date in YYYY-MM-DD format"""
     dt_date = datetime.date.fromisoformat(date)
@@ -36,5 +34,5 @@ def advance_to_date(portfolio: models.Portfolio, date: str) -> None:
         date_str = str(portfolio.date)[:7]
         if date_str != last_date_str:
             last_date_str = date_str
-            print(date_str, end='\r')
-    print('')
+            print(date_str, end="\r")
+    print("")

@@ -3,7 +3,7 @@ import json
 import datetime
 from collections import namedtuple
 
-from sqlalchemy import select, asc, desc, func, delete
+from sqlalchemy import select, desc, delete
 
 from kytrade import calc
 
@@ -72,7 +72,7 @@ class StockMarket:
     def load_stocks_from_datahub_file(self, path):
         """Load a datahub stock export into the 'stocks' table"""
         index = next((match for match in INDEXES if match in path), None)
-        with open(path, "r") as fil:
+        with open(path, "r", encoding="utf8") as fil:
             data = json.load(fil)
         for entry in data:
             symbol = entry["Symbol"]
@@ -165,9 +165,8 @@ class StockMarket:
         if limit == 0:
             # return all data starting from the index of the given date
             return self.daily_price_history[ticker][index:]
-        else:
-            # same as above, but only return up to the index indicated by the limit
-            return self.daily_price_history[ticker][index : index + limit]
+        # same as above, but only return up to the index indicated by the limit
+        return self.daily_price_history[ticker][index : index + limit]
 
     def get_spot(self, ticker: str, date: str) -> float:
         """Return the closing price for the given stock at the given day"""

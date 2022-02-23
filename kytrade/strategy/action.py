@@ -58,7 +58,7 @@ def _assert_total_alloc_percent(percents: list, target: int) -> None:
 
 def rebalance(portfolio: models.Portfolio, cash: float = 0, stocks: dict = {}):
     """Rebalance at best effort to given percentage allocations"""
-    percents_list = [float(cash)] + [float(v) for k,v in stocks.items()]
+    percents_list = [float(cash)] + [float(v) for k, v in stocks.items()]
     _assert_total_alloc_percent(percents_list, 100)
     for symbol in stocks:
         percent = stocks[symbol]
@@ -72,4 +72,3 @@ def execute_action(portfolio: models.Portfolio, action_name: str, args: dict = {
         rebalance(portfolio, cash=args["cash"], stocks=args["stocks"])
     else:
         raise InvalidStrategyActionName(action_name)
-

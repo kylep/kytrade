@@ -16,7 +16,6 @@ DOCUMENT = "conditions"
 CACHE = {}
 
 
-
 def set_condition(name: str, condition_type: str, args: dict = {}):
     """Create an condition record in the database"""
     db_conditions = get_document(DOCUMENT)
@@ -55,12 +54,12 @@ def start_of_month(portfolio):
 
 def start_of_quarter(portfolio):
     """Start of quarter condition"""
-    return (portfolio.date.month % 3 == 0 and portfolio.date.day == 1)
+    return portfolio.date.month % 3 == 0 and portfolio.date.day == 1
 
 
 def start_of_year(portfolio):
     """Start of year condition"""
-    return (portfolio.date.month == 1 and portfolio.date.day == 1)
+    return portfolio.date.month == 1 and portfolio.date.day == 1
 
 
 def check_condition(portfolio: models.Portfolio, condition_name: str, args: dict = {}) -> bool:

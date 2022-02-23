@@ -1,10 +1,8 @@
 """Metadata Calculations"""
 import math
-from gmpy2 import mpfr
 
 # Reminder: To step through these functions, drop step_trace at the end of an interation
 # import pdb  # pdb.set_trace()
-import pdb
 
 
 def compound_anual_growth_rate(days: list, value_attr: str) -> float:
@@ -92,14 +90,14 @@ def max_drawdown(days: list, value_attr: str) -> dict:
     reversed_days = days.copy()  # days is passed by reference, don't want to reverse the original
     ret = None
     reversed_days.reverse()
-    assert (days[0].date > days[-1].date), "MDD expected chronologically descending order"
+    assert days[0].date > days[-1].date, "MDD expected chronologically descending order"
     values = [getattr(day, value_attr) for day in reversed_days]  # (list order is preserved)
     index = 0
     peak = values[0]
     peak_date = reversed_days[index].date
     trough, trough_index = indexed_min(values)
     trough_date = reversed_days[trough_index].date
-    for index, day in enumerate(reversed_days):
+    for index in range(len(values)):
         # mdd_day = max_drawdown_at_day(reversed_days, day, value_attr, index)
         # if the new peak is higher than the old peak, raise the peak
         if values[index] > peak:

@@ -39,12 +39,11 @@ metad:
 """
 # TODO: remove date_opened, value_history's first entry covers it
 import datetime
-from sqlalchemy import select, delete, desc, or_
+from sqlalchemy import select
 from sqlalchemy.orm.attributes import flag_modified
 
 from kytrade.data import db
 from kytrade.data import models
-from kytrade import exceptions as exc
 from kytrade.ps import metadata
 from kytrade.ps.enums import TransactionAction, CashOperationAction
 
@@ -53,13 +52,21 @@ def create_portfolio(
     name: str,
     date: str,
     cash: float = 0,
-    stock_positions: dict = {},
-    stock_transactions: list = [],
-    cash_operations: list = [],
-    value_history: dict = {},
-    strategies: list = [],
+    stock_positions: dict = None,
+    stock_transactions: list = None,
+    cash_operations: list = None,
+    value_history: dict = None,
+    strategies: list = None,
 ) -> None:
     """Write portfolio state to DB"""
+    # (W0511) Setting arguments as lists/dicts is dangerous
+    # https://stackoverflow.com/questions/26320899/why-is-the-empty-dictionary-a-dangerous-default-value-in-python
+    stock_positions = stock_positions if stock_positions else {}
+    stock_transactions = stock_transactions if stock_transactions else []
+    cash_operations = cash_operations if cash_operations else []
+    value_history = value_history if value_history else {}
+    strategies = strategies if strategies else []
+    # /W0511 fixup
     dt_date = datetime.date.fromisoformat(str(date))
     data = {
         "date_opened": date,
@@ -134,15 +141,3 @@ def log_value_history(portfolio: models.Portfolio) -> None:
         "total_usd": metadata.total_value(portfolio),
         "profit_usd": metadata.profit(portfolio),
     }
-
-
-def add_strategy(portfolio: models.Portfolio, strategy_name: str) -> None:
-    """Add a strategy to a portfolio"""
-    if strategy_name not in portfolio.data["strategies"]:
-        portfolio.data["strategies"].append(strategy_name)
-
-
-def remove_strategy(portfolio: models.Portfolio, strategy_name: str) -> None:
-    """Remove a strategy from a portfolio"""
-    if strategy_name in portfolio.data["strategies"]:
-        portfolio.data["strategies"].remove(strategy_name)

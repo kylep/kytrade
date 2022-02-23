@@ -1,4 +1,5 @@
 """Alpaca API"""
+# pylint: skip-file
 import requests
 from kytrade.const import ALPACA_API_KEY_ID, ALPACA_API_KEY_SECRET, ALPACA_API_ENDPOINT
 

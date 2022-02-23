@@ -3,7 +3,6 @@ import math
 
 import kytrade.exceptions as exc
 from kytrade.data import models
-from kytrade.data import db
 from kytrade.stock_market import StockMarket
 from kytrade.ps.enums import CashOperationAction
 from kytrade.ps import portfolio as ps
@@ -59,7 +58,7 @@ def pay_brokerage_stock_comission(portfolio: models.Portfolio) -> None:
     """Pay the comission to the brokerage - discourages frequent low-profit trading"""
     new_val = portfolio.data["cash"] - const.TX_BROKERAGE_COMISSION
     if new_val < 0:
-        raise exc.InsufficientFundsError(f"Can't afford commission on this trade")
+        raise exc.InsufficientFundsError("Can't afford commission on this trade")
     portfolio.data["cash"] = new_val
 
 

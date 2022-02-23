@@ -1,4 +1,5 @@
 """IBKR TWS API"""
+# pylint: skip-file
 import threading
 import time
 
@@ -59,8 +60,6 @@ def get_stock_contract(symbol: str, exchange: str = None) -> Contract:
     contract.exchange = exchange if exchange else "NYSE"
     contract.currency = "USD"
     return contract
-    # TODO: What is this for?
-    # client.app.reqContractDetails()
 
 
 class IbkrClient:
@@ -90,7 +89,7 @@ class IbkrClient:
                 time.sleep(1)  # Sleep interval to allow time for connection to server (ugh...)
             if self.app.connState != CONN_STATES["CS_CONNECTED"]:
                 raise NotConnectedError(f"IBKR TWS ConnState: {self.app.connState}")
-            cls._instance = self  # TODO: Verify if I need this - call-by-reference... right?
+            cls._instance = self
         assert cls._instance.thread.is_alive(), "Thread must be alive!"
         return cls._instance
 

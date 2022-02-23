@@ -3,9 +3,6 @@
     api docs:   https://www.alphavantage.co/documentation/
     py lib:     https://github.com/RomelTorres/alpha_vantage
 """
-import os
-import sys
-
 from alpha_vantage.timeseries import TimeSeries
 
 from kytrade.data import models

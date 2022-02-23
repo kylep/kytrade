@@ -20,7 +20,7 @@ VERSION = "1.0001"
 # env_var allows reconfiguring the tool without config files - works well with containers too
 
 # Upstream API Keys
-# TODO: Pick which ones really matter
+# Currently *none* of these are required, Yahoo's data doesn't need an API key
 ALPHAVANTAGE_API_KEY = env_var("ALPHAVANTAGE_API_KEY", None, required=False)
 STOCKSHARK_API_KEY = env_var("STOCKSHARK_API_KEY", None, required=False)
 ALPACA_API_KEY_ID = env_var("ALPACA_API_KEY_ID", None, required=False)

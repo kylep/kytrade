@@ -6,6 +6,7 @@ Minute-by-minute price data exists for the last 30 days.
 
 They charge using a credit system, with the free account having a certain low qty of credits
 """
+# pylint: skip-file
 import requests
 from kytrade.const import IEXCLOUD_API_KEY
 

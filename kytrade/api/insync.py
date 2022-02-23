@@ -3,6 +3,7 @@
 You gotta pay IBKR for some market data for anything to work. Its like $15/mo, $5 if you spend
 enough on their comissions. Seems very detailed and real-time-y but not a ton of history.
 """
+# pylint: skip-file
 from ib_insync import *
 
 

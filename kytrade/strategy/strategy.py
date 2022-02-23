@@ -80,4 +80,3 @@ def execute_strategy(portfolio: models.Portfolio, strategy_name):
             else:
                 actn = action.CACHE[action_name]
             action.execute_action(portfolio, actn["type"], actn["args"])
-

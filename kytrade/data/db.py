@@ -2,7 +2,6 @@
 import sqlalchemy
 from sqlalchemy.orm import Session
 from pandas.core.frame import DataFrame
-from sqlalchemy.orm.attributes import flag_modified
 
 from kytrade import const
 from kytrade.data import models
@@ -30,19 +29,6 @@ def init_create_tables():
 def get_session() -> Session:
     """Get a session for this engine"""
     return Session(bind=engine, expire_on_commit=False)
-
-
-def save_dataframe(orm_model: models.Base, df: DataFrame) -> None:
-    """Save a pandas dataframe to the db as a given model"""
-    # TODO: Deprecate - not using pandas any more
-    df.to_sql(
-        orm_model.__tablename__,
-        schema=const.SQL_DATABASE,
-        con=engine,
-        index=False,
-        if_exists="append",
-        method="multi",
-    )
 
 
 def commit(orm_object):

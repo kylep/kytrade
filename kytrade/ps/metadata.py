@@ -17,6 +17,7 @@ def value_days_history_named_tuples(portfolio: models.Portfolio) -> list:
         days.append(ValueDay(date_dt, data["total_usd"]))
     return days
 
+
 def total_value(portfolio: models.Portfolio) -> float:
     """Return the value of all stocks + cash in given portfolio"""
     sm = StockMarket()
@@ -49,4 +50,3 @@ def total_withdrawn(portfolio: models.Portfolio) -> float:
 def profit(portfolio: models.Portfolio) -> float:
     """Return the total_value plus total withdrawn minus total deposited"""
     return total_value(portfolio) + total_withdrawn(portfolio) - total_withdrawn(portfolio)
-

@@ -19,7 +19,7 @@ def _get_ps_table(portfolios: list):
     headers = ["Name", "Start", "End", "Positions", "Cash", "Value", "CAGR %", "MDD %"]
     table.columns.header = headers
     for portfolio in portfolios:
-        print(f" CALC: {portfolio.name}                           ", end='\r')
+        print(f" CALC: {portfolio.name}                           ", end="\r")
         sp = portfolio.data["stock_positions"]
         positions = ",".join([f"{key}={sp[key]}" for key in sp.keys()])
         value_days = metadata.value_days_history_named_tuples(portfolio)
@@ -34,7 +34,7 @@ def _get_ps_table(portfolios: list):
             f"${portfolio.data['cash']:,.2f}",
             f"${metadata.total_value(portfolio):,.2f}",
             f"{cagr:.2f}",
-            f"{mdd['percent']:.2f}"
+            f"{mdd['percent']:.2f}",
         ]
         table.rows.append(row)
     return table

@@ -1,5 +1,16 @@
 # 002-IndexETFWithBondETF
 
+
+## Conclusions
+
+- Inversely corrolated stocks help reduce MDD disproportionately to their reduction in CAGR.
+  - This is probably why you see them used with leverage
+- Rebalance intervals do not have consistent impacts on a portfolio. Yearly outperforms quarterly,
+  even though in general rebalancing more often increases CAGR and MDD
+- `BND` is better to hold for its own sake than `TLT`, but `TLT` balances out an equities portfolio
+  better.
+
+
 ## To execute
 
 Run [Scenario002](./Scenario002.sh): `./Scenario002.sh`
@@ -13,9 +24,13 @@ chosen. The stock ETF selected is the usual VTI since it's so popular in the FIR
 SPY or QQQ or whatever would also be interesting. Notably *not* being tested is the leveraged
 "hedge-fundies excellent adventure" scenario, as it will be tested in its own scenario.
 
-An initial investment of $100,000 will be invested.
+This scenario dips its toes into [Modern Portfolio Theory](https://www.investopedia.com/terms/m/modernportfoliotheory.asp)
+by comparing a portfolio w/ two holdings. One is non-correlated and the other is somewhat inversely
+correlated.
 
-The first set of experiments will set up 3 baselines with buy and hold, then compare quarterly
+An initial investment of $100,000 is invested.
+
+The first set of experiments set up 3 baselines with buy and hold, then compare quarterly
 rebalancing against them.
 
  - S002-100.VTI-BAH: 100% VTI Buy and Hold
@@ -31,9 +46,83 @@ rebalancing against them.
 time does seem to be above the current risk-free rate, but very probably lower than the average
 risk-free rate over the same duration (which I don't have).
 
-This scenario dips its toes into [Modern Portfolio Theory](https://www.investopedia.com/terms/m/modernportfoliotheory.asp)
-by comparing a portfolio two holdings. One is non-correlated and the other is somewhat inversely
-correlated.
+Unsuprisingly VTI + TLT did the best, with dividend adjusted CAGR of `8.96%` and a max drawdown
+of only `21.92%`. The Sharpe ratio column is new and I'm not sure that it's right.
+
+The next scenario expands on the `S002-50.VTI-50.TLT-RBAL-Quarterly` scenario by testing `40/60`,
+`60/40`,`75/25`, and `90/10` splits of `VTI/TLT`.
+
+- S002-40.VTI-60.TLT-RBAL-Quarterly
+- S002-60.VTI-40.TLT-RBAL-Quarterly
+- S002-75.VTI-25.TLT-RBAL-Quarterly
+- S002-90.VTI-10.TLT-RBAL-Quarterly
+
+Those experiments show sort of a non-linear slider where CAGR goes down along with MDD as the ratio
+of TLT increases. There's no objectively best option but the 60/40 (~30% drawdown) seems good for
+growth and 50/50 (~22% drawdown) seems good overall.
+
+Next experiments check to see the impact of different rebalance frequencies on the above 50/50
+distribution.
+
+ - S002-50.VTI-50.TLT-RBAL-Daily
+ - S002-50.VTI-50.TLT-RBAL-Monthly
+ - S002-50.VTI-50.TLT-RBAL-Yearly
+
+This experiment shows the MDD get lower as you rebalance less frequently. You'd expect the CAGR to
+also go down alongside the MDD, which it mostly does, with one interesting outlier. The yearly
+rebalancing actually has a higher CAGR `9.12` than quarterly's `8.81`, making it objectively
+better.
+
+
+---
+
+
+# Results Table
+
+The data has been sorted to be easier to read.
+
+Adjusted for splits and dividends:
+
+|               Name                |   Start    |    End     |     Positions     |    Value    | CAGR % | MDD % | Sharpe |
+|-----------------------------------|------------|------------|-------------------|-------------|--------|-------|--------|
+|         S002-100.VTI-BAH          | 2007-04-10 | 2022-02-24 |     VTI=1840      | $398,536.69 |  9.62  | 55.45 | 0.527  |
+|      S002-50.VTI-50.CASH-BAH      | 2007-04-10 | 2022-02-24 |      VTI=920      | $249,268.34 |  6.24  | 28.88 | 0.668  |
+|         S002-100.BND-BAH          | 2007-04-10 | 2022-02-24 |     BND=2096      | $170,311.37 |  3.63  | 9.31  | 0.805  |
+|         S002-100.TLT-BAH          | 2007-04-10 | 2022-02-24 |     TLT=1767      | $241,720.47 |  6.11  | 26.58 | 0.625  |
+|      S002-50.VTI-50.BND-BAH       | 2007-04-10 | 2022-02-24 | BND=1048,VTI=920  | $284,424.03 |  7.19  | 24.94 | 0.642  |
+|      S002-50.VTI-50.TLT-BAH       | 2007-04-10 | 2022-02-24 |  TLT=883,VTI=920  | $320,088.48 |  8.06  | 17.42 | 0.592  |
+| S002-50.VTI-50.BND-RBAL-Quarterly | 2007-04-10 | 2022-02-24 | BND=1726,VTI=639  | $278,740.68 |  7.07  | 28.46 | 0.632  |
+| S002-50.VTI-50.TLT-RBAL-Quarterly | 2007-04-10 | 2022-02-24 | TLT=1263,VTI=837  | $354,176.54 |  8.81  | 21.92 | 0.559  |
+
+Allocation adjustments:
+
+|               Name                |   Start    |    End     |     Positions     |    Value    | CAGR % | MDD % | Sharpe |
+|-----------------------------------|------------|------------|-------------------|-------------|--------|-------|--------|
+| S002-90.VTI-10.TLT-RBAL-Quarterly | 2007-04-10 | 2022-02-24 | TLT=279,VTI=1663  | $398,527.62 |  9.63  | 49.42 | 0.529  |
+| S002-75.VTI-25.TLT-RBAL-Quarterly | 2007-04-10 | 2022-02-24 | TLT=686,VTI=1364  | $389,565.13 |  9.48  | 39.64 | 0.536  |
+| S002-60.VTI-40.TLT-RBAL-Quarterly | 2007-04-10 | 2022-02-24 | TLT=1053,VTI=1047 | $370,889.64 |  9.14  | 29.01 | 0.548  |
+| S002-50.VTI-50.TLT-RBAL-Quarterly | 2007-04-10 | 2022-02-24 | TLT=1263,VTI=837  | $354,176.54 |  8.81  | 21.92 | 0.559  |
+| S002-40.VTI-60.TLT-RBAL-Quarterly | 2007-04-10 | 2022-02-24 | TLT=1439,VTI=635  | $334,673.56 |  8.41  | 18.15 | 0.571  |
+
+
+Frequency adjustments:
+
+|               Name                |   Start    |    End     |     Positions     |    Value    | CAGR % | MDD % | Sharpe |
+|-----------------------------------|------------|------------|-------------------|-------------|--------|-------|--------|
+|   S002-50.VTI-50.TLT-RBAL-Daily   | 2007-04-10 | 2022-02-22 | TLT=1333,VTI=852  | $369,584.26 |  9.22  | 23.15 | 0.561  |
+|  S002-50.VTI-50.TLT-RBAL-Monthly  | 2007-04-10 | 2022-02-22 | TLT=1296,VTI=803  | $353,974.00 |  8.9   | 24.18 | 0.568  |
+| S002-50.VTI-50.TLT-RBAL-Quarterly | 2007-04-10 | 2022-02-24 | TLT=1263,VTI=837  | $354,176.54 |  8.81  | 21.92 | 0.559  |
+|  S002-50.VTI-50.TLT-RBAL-Yearly   | 2007-04-10 | 2022-02-22 | TLT=1342,VTI=823  | $364,568.88 |  9.12  | 20.54 | 0.564  |
+|      S002-50.VTI-50.TLT-BAH       | 2007-04-10 | 2022-02-24 |  TLT=883,VTI=920  | $320,088.48 |  8.06  | 17.42 | 0.592  |
+
+
+
+
+---
+
+
+# Notes
+
 
 ## Symbols
 
@@ -48,8 +137,6 @@ correlated.
   - div yield of ~1.6% not currently implemented
   - -0.31 correlation with VTI
 
-
-
 ## Start date
 
 It would be really nice to backdate things further. It might be worth running VTI and TLT back to
@@ -60,48 +147,15 @@ A new feature was implemented in `kt sm describe` so the output is valid JSON, a
 used with `jq` and `jless` for filtering.
 
 ```
-kt sm describe VTI | jq .start -r
-# 2001-06-15
-
-kt sm describe BND | jq .start -r
-# 2007-04-10
-
-kt sm describe TLT | jq .start -r
-# 2002-07-30
+kt sm describe VTI | jq .start -r  # 2001-06-15
+kt sm describe BND | jq .start -r  # 2007-04-10
+kt sm describe TLT | jq .start -r  # 2002-07-30
 ```
 
-## Open Questions
+Another new feature is allowing to adjust for dividends. You can enable/disable the adjustments now
+but running:
 
- - What will the results of the test be?
-
-
----
-
-
-# Results Table
-
-|               Name                |   Start    |    End     |    Positions     |    Cash    |    Value    | CAGR % | MDD % | Sharpe |
-|-----------------------------------|------------|------------|------------------|------------|-------------|--------|-------|--------|
-|         S002-100.VTI-BAH          | 2007-04-10 | 2022-02-22 |     VTI=1386     |   $48.61   | $300,602.71 |  7.77  | 56.63 | 0.598  |
-|      S002-50.VTI-50.CASH-BAH      | 2007-04-10 | 2022-02-22 |     VTI=693      | $50,024.31 | $200,301.35 |  4.84  | 29.38 | 0.722  |
-|         S002-100.BND-BAH          | 2007-04-10 | 2022-02-22 |     BND=1329     |   $6.04    | $108,292.96 |  0.54  | 11.18 | 0.191  |
-|         S002-100.TLT-BAH          | 2007-04-10 | 2022-02-22 |     TLT=1143     |   $67.51   | $158,475.88 |  3.13  | 28.44 | 0.652  |
-|      S002-50.VTI-50.BND-BAH       | 2007-04-10 | 2022-02-22 | BND=664,VTI=693  |   $64.95   | $204,444.71 |  4.99  | 28.98 | 0.719  |
-|      S002-50.VTI-50.TLT-BAH       | 2007-04-10 | 2022-02-22 | TLT=571,VTI=693  |  $101.77   | $229,513.71 |  5.79  | 21.29 | 0.683  |
-| S002-50.VTI-50.BND-RBAL-Quarterly | 2007-04-10 | 2022-02-22 | BND=1192,VTI=442 |   $26.03   | $192,997.89 |  4.56  | 31.77 | 0.702  |
-| S002-50.VTI-50.TLT-RBAL-Quarterly | 2007-04-10 | 2022-02-22 | TLT=881,VTI=583  |  $294.00   | $248,815.34 |  6.35  | 25.17 | 0.654  |
-
-Or adjusted for splits/dividends:
-
-|               Name                |   Start    |    End     |    Positions     |    Cash    |    Value    | CAGR % | MDD % | Sharpe |
-|-----------------------------------|------------|------------|------------------|------------|-------------|--------|-------|--------|
-|         S002-100.VTI-BAH          | 2007-04-10 | 2022-02-22 |     VTI=1840     |   $11.09   | $399,015.09 |  9.84  | 55.45 |  0.54  |
-|      S002-50.VTI-50.CASH-BAH      | 2007-04-10 | 2022-02-22 |     VTI=920      | $50,005.54 | $249,507.54 |  6.41  | 28.88 | 0.688  |
-|         S002-100.BND-BAH          | 2007-04-10 | 2022-02-22 |     BND=2096     |   $11.37   | $170,793.45 |  3.67  | 9.31  | 0.814  |
-|         S002-100.TLT-BAH          | 2007-04-10 | 2022-02-22 |     TLT=1767     |   $47.88   | $244,936.41 |  6.19  | 26.58 | 0.633  |
-|      S002-50.VTI-50.BND-BAH       | 2007-04-10 | 2022-02-22 | BND=1048,VTI=920 |   $11.23   | $284,904.27 |  7.35  | 24.94 | 0.658  |
-|      S002-50.VTI-50.TLT-BAH       | 2007-04-10 | 2022-02-22 | TLT=883,VTI=920  |   $57.77   | $321,934.74 |  8.23  | 17.42 | 0.605  |
-| S002-50.VTI-50.BND-RBAL-Quarterly | 2007-04-10 | 2022-02-22 | BND=1726,VTI=639 |  $102.21   | $279,303.84 |  7.2   | 28.46 | 0.645  |
-| S002-50.VTI-50.TLT-RBAL-Quarterly | 2007-04-10 | 2022-02-22 | TLT=1263,VTI=837 |  $150.33   | $356,692.95 |  8.96  | 21.92 | 0.569  |
-
-
+```
+export ADJUST_FOR_DIVIDENDS=TRUE
+export ADJUST_FOR_DIVIDENDS=FALSE
+```

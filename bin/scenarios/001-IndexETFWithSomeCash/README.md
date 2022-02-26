@@ -25,6 +25,7 @@ place.
 
 ### Results Table
 
+Without dividends:
 
 |          Name          |   Start    |    End     | Positions  |    Cash     |     Value     | CAGR % | MDD % |
 |------------------------|------------|------------|------------|-------------|---------------|--------|-------|
@@ -38,10 +39,24 @@ place.
 |     S001-UPRO-BAH      | 2009-06-25 | 2022-02-22 | UPRO=82940 |    $0.85    | $4,743,339.45 | 35.64  | 76.82 |
 | S001-UPRO-75-Quarterly | 2009-06-25 | 2022-02-22 | UPRO=22557 | $488,964.05 | $1,778,998.88 | 25.53  | 62.37 |
 
+With dividends:
+
+|          Name          |   Start    |    End     | Positions  |    Cash     |     Value     | CAGR % | MDD % | Sharpe |
+|------------------------|------------|------------|------------|-------------|---------------|--------|-------|--------|
+|      S001-VTI-BAH      | 2001-06-15 | 2022-02-22 |  VTI=2620  |   $32.07    |  $568,179.07  |  8.82  | 55.44 | 0.477  |
+|  S001-VTI-50-Monthly   | 2001-06-15 | 2022-02-22 |  VTI=578   | $132,478.78 |  $257,818.08  |  4.71  | 32.15 | 0.695  |
+|  S001-VTI-75-Monthly   | 2001-06-15 | 2022-02-22 |  VTI=1329  | $101,363.10 |  $389,556.75  |  6.84  | 44.79 | 0.578  |
+|  S001-VTI-95-Monthly   | 2001-06-15 | 2022-02-22 |  VTI=2308  | $27,834.70  |  $528,324.50  |  8.43  | 53.46 | 0.496  |
+|   S001-VTI-75-Daily    | 2001-06-15 | 2022-02-22 |  VTI=1368  | $99,125.27  |  $395,776.07  |  6.92  | 44.45 | 0.574  |
+| S001-VTI-75-Quarterly  | 2001-06-15 | 2022-02-22 |  VTI=1312  | $100,341.22 |  $384,848.42  |  6.77  | 44.1  | 0.576  |
+|   S001-VTI-75-Yearly   | 2001-06-15 | 2022-02-22 |  VTI=1321  | $106,327.02 |  $392,785.87  |  6.88  | 43.89 | 0.574  |
+|     S001-UPRO-BAH      | 2009-06-25 | 2022-02-22 | UPRO=85197 |    $0.87    | $4,717,358.76 | 35.93  | 76.82 | 0.119  |
+| S001-UPRO-75-Quarterly | 2009-06-25 | 2022-02-22 | UPRO=29070 | $630,276.68 | $2,239,882.58 | 28.07  | 62.37 | 0.205  |
+
+
 
 ### Open Questions
 
-- Dividends aren't implemented, how much worse would the cash be once they are?
 - Data didn't include the dot-com crash. I think with huge crashes the cash positions might perform
   better. Still, betting on a dot-com style crash for your portfolio allocation to pay off doesn't
   seem like a good plan.

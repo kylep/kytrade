@@ -2,6 +2,7 @@
 
 # Set the comission to 0
 export TX_BROKERAGE_COMISSION=0
+export ADJUST_FOR_DIVIDENDS=TRUE
 
 
 START=2001-06-15

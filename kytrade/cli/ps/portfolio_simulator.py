@@ -17,7 +17,7 @@ def _get_ps_table(portfolios: list):
     """Print a list of portfolios"""
     table = BeautifulTable(maxwidth=140)
     table.set_style(BeautifulTable.STYLE_MARKDOWN)
-    headers = ["Name", "Start", "End", "Positions", "Cash", "Value", "CAGR %", "MDD %", "Sharpe"]
+    headers = ["Name", "Start", "End", "Positions", "Value", "CAGR %", "MDD %", "Sharpe"]
     table.columns.header = headers
     for portfolio in portfolios:
         print(f" CALC: {portfolio.name}                           ", end="\r")
@@ -32,7 +32,6 @@ def _get_ps_table(portfolios: list):
             portfolio.data["date_opened"],
             str(portfolio.date),
             positions,
-            f"${portfolio.data['cash']:,.2f}",
             f"${metadata.total_value(portfolio):,.2f}",
             f"{cagr:.2f}",
             f"{mdd['percent']:.2f}",

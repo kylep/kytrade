@@ -2,12 +2,12 @@
 
 ## To execute
 
-Run `./Scenario002.sh`
+Run [Scenario002](./Scenario002.sh): `./Scenario002.sh`
 
 
 ## Details
 
-This backtest scenario will simulate a traditional stocks + bonds portfolio, except using ETFs.
+This backtest scenario can simulate a traditional stocks + bonds portfolio, except using ETFs.
 At the time of running this, `kytrade` doesn't support actual bonds, so two popular bond ETFs are
 chosen. The stock ETF selected is the usual VTI since it's so popular in the FIRE community, though
 SPY or QQQ or whatever would also be interesting. Notably *not* being tested is the leveraged
@@ -31,7 +31,7 @@ rebalancing against them.
 time does seem to be above the current risk-free rate, but very probably lower than the average
 risk-free rate over the same duration (which I don't have).
 
-This scenario dips its toes into [Modern Portfolio Theory][https://www.investopedia.com/terms/m/modernportfoliotheory.asp]
+This scenario dips its toes into [Modern Portfolio Theory](https://www.investopedia.com/terms/m/modernportfoliotheory.asp)
 by comparing a portfolio two holdings. One is non-correlated and the other is somewhat inversely
 correlated.
 

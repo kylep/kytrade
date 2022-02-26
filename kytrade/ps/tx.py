@@ -103,20 +103,43 @@ def sell_stock_by_cost(portfolio: models.Portfolio, symbol: str, cost: float) ->
     sell_stock(portfolio, symbol, qty)
 
 
-def rebalance_stock_position(portfolio: models.Portfolio, symbol: str, percent: float):
-    """Buy or sell stock so it makes up percent of portfolio value"""
-    ps_value = metadata.total_value(portfolio)
+def _assert_total_alloc_percent(percents: list, target: int) -> None:
+    """Assert the allocation percentage (sum of percents list) equals target else raise exc"""
+    total_percents = sum(percents)
+    if total_percents != target:
+        err = f"{total_percents} != {target}"
+        raise InvalidTotalPortfolioAllocationPercentage(f"{total_percents} != {target}")
+
+
+# def rebalance_stock_position(portfolio: models.Portfolio, symbol: str, percent: float):
+def rebalance_stock_positions(portfolio: models.Portfolio, cash_pct: float, stocks: dict) -> None:
+    """Buy or sell stocks so they make up given percent of portfolio value
+    stocks dict expects format of {"<symbol>": <#percent>}
+    """
+    percents_list = [float(cash_pct)] + [float(v) for k, v in stocks.items()]
+    _assert_total_alloc_percent(percents_list, 100)
+    portfolio_value = metadata.total_value(portfolio)
     sm = StockMarket()
-    unit_price = sm.get_spot(symbol, portfolio.date).close
-    multiplier = float(percent) / 100  # Click can pass percent as a str
-    required_shares = math.ceil(ps_value * multiplier / unit_price)
-    if symbol in portfolio.data["stock_positions"]:
-        current_qty = portfolio.data["stock_positions"][symbol]
-    else:
-        current_qty = 0
-    if required_shares > current_qty:
-        qty = required_shares - current_qty
-        buy_stock(portfolio, symbol, qty)
-    elif required_shares < current_qty:
-        qty = current_qty - required_shares
-        sell_stock(portfolio, symbol, qty)
+    buys = []
+    sells = []
+    # sort the rebalance actions into buy and sell so sell can go first else InsufficientFundsError
+    for symbol in stocks:
+        percent = stocks[symbol]
+        unit_price = sm.get_spot(symbol, portfolio.date).close
+        multiplier = float(percent) / 100  # Click can pass percent as a str
+        # Need to always round down. Ceil raises InsufficientFundsError
+        required_shares = math.floor(portfolio_value * multiplier / unit_price)
+        if symbol in portfolio.data["stock_positions"]:
+            current_qty = portfolio.data["stock_positions"][symbol]
+        else:
+            current_qty = 0
+        if required_shares > current_qty:
+            qty = required_shares - current_qty
+            buys.append({"symbol": symbol, "qty": qty})
+        elif required_shares < current_qty:
+            qty = current_qty - required_shares
+            sells.append({"symbol": symbol, "qty": qty})
+    for stock in sells:
+        sell_stock(portfolio, stock["symbol"], stock["qty"])
+    for stock in buys:
+        buy_stock(portfolio, stock["symbol"], stock["qty"])

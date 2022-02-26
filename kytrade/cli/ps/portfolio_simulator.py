@@ -1,4 +1,5 @@
 """ portfoliocommands """
+import json
 import click
 import datetime
 from beautifultable import BeautifulTable, ALIGN_LEFT
@@ -14,9 +15,9 @@ from kytrade.cli.ps.strat import strat
 
 def _get_ps_table(portfolios: list):
     """Print a list of portfolios"""
-    table = BeautifulTable(maxwidth=120)
+    table = BeautifulTable(maxwidth=140)
     table.set_style(BeautifulTable.STYLE_MARKDOWN)
-    headers = ["Name", "Start", "End", "Positions", "Cash", "Value", "CAGR %", "MDD %"]
+    headers = ["Name", "Start", "End", "Positions", "Cash", "Value", "CAGR %", "MDD %", "Sharpe"]
     table.columns.header = headers
     for portfolio in portfolios:
         print(f" CALC: {portfolio.name}                           ", end="\r")
@@ -24,8 +25,8 @@ def _get_ps_table(portfolios: list):
         positions = ",".join([f"{key}={sp[key]}" for key in sp.keys()])
         value_days = metadata.value_days_history_named_tuples(portfolio)
         cagr = calc.compound_anual_growth_rate(value_days, value_attr="total")
-        value_days.reverse()  # TODO: Why do I need that?
         mdd = calc.max_drawdown(value_days, value_attr="total")
+        sharpe = calc.sharpe_ratio(value_days, value_attr="total")
         row = [
             portfolio.name,
             portfolio.data["date_opened"],
@@ -35,6 +36,7 @@ def _get_ps_table(portfolios: list):
             f"${metadata.total_value(portfolio):,.2f}",
             f"{cagr:.2f}",
             f"{mdd['percent']:.2f}",
+            sharpe
         ]
         table.rows.append(row)
     return table
@@ -74,38 +76,16 @@ def _list(details):
 def describe(name):
     """Print a detailed overview of a portfolio instance"""
     portfolio = ps.get_portfolio(name)
-    click.echo(f"date: {portfolio.date}")
-    pprint(portfolio.data)
-    return
-    # TODO: re-implement this with the new data structure
-    table = BeautifulTable(maxwidth=120, default_alignment=ALIGN_LEFT)
-    table.set_style(BeautifulTable.STYLE_COMPACT)
-    table.rows.append(["ID", portfolio.id])
-    table.rows.append(["Name", portfolio.name])
-    table.rows.append(
-        ["Compound Anual Growth Rate", f"{portfolio.compound_anual_growth_rate:.2f}%"]
-    )
-    table.rows.append(["Start Date", str(portfolio.date_opened)])
-    table.rows.append(["Simulation Date", str(portfolio.date)])
-    table.rows.append(["Days Open", f"{portfolio.days_opened:,}"])
-    table.rows.append(["Years Open", f"{portfolio.years_opened:.2f}"])
-    table.rows.append(["Book Value", f"${portfolio.total_deposited:,.2f}"])
-    table.rows.append(["Market Value", f"${portfolio.value_at_close:,.2f}"])
-    table.rows.append(["Total Profit", f"${portfolio.profit:,.2f}"])
-    table.rows.append(["Return on Investment", f"{portfolio.return_on_investment:.2f}%"])
-    table.rows.append(
-        [
-            "All-Time Low",
-            f"${portfolio.all_time_daily_low.total_usd:,.2f} at {portfolio.all_time_daily_low.date}",
-        ]
-    )
-    table.rows.append(
-        [
-            "All-Time High",
-            f"${portfolio.all_time_daily_high.total_usd:,.2f} at {portfolio.all_time_daily_high.date}",
-        ]
-    )
-    click.echo(table)
+    value_days = metadata.value_days_history_named_tuples(portfolio)
+    cagr = calc.compound_anual_growth_rate(value_days, value_attr="total")
+    mdd = calc.max_drawdown(value_days, value_attr="total")
+    sharpe = calc.sharpe_ratio(value_days, value_attr="total")
+    portfolio.data["metadata"] = {
+        "cagr": cagr,
+        "max_draw_down": mdd,
+        "sharpe_ratio": sharpe
+    }
+    click.echo(json.dumps(portfolio.data, indent=2, default=str))
 
 
 @click.argument("name")

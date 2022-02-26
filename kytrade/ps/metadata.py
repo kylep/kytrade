@@ -50,3 +50,16 @@ def total_withdrawn(portfolio: models.Portfolio) -> float:
 def profit(portfolio: models.Portfolio) -> float:
     """Return the total_value plus total withdrawn minus total deposited"""
     return total_value(portfolio) + total_withdrawn(portfolio) - total_withdrawn(portfolio)
+
+
+def sorted_stock_position_values(portfolio: models.Portfolio) -> list:
+    """Return a list of {"symbol": "", value: #} sorted by value"""
+    positions = portfolio.data["stock_positions"]
+    sm = StockMarket()
+    ret = []
+    for symbol in positions:
+        qty = positions[symbol]
+        unit_price = sm.get_spot(symbol, portfolio.date).close
+        value = qty * unit_price
+        ret.append({"symbol": symbol, "value": value})
+    return sorted(ret, key=lambda k: k["value"])

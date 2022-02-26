@@ -1,8 +1,24 @@
 """Metadata Calculations"""
 import math
 
+import pandas
+
+from kytrade import const
+
 # Reminder: To step through these functions, drop step_trace at the end of an interation
 # import pdb  # pdb.set_trace()
+
+
+def copy_and_conditionally_reverse_days(days: list, old_to_new=True) -> list:
+    """Return a copy of the days list - reverses it if the order is wrong"""
+    new_days = days.copy()
+    if not new_days or len(new_days) < 2:
+        return new_days
+    if (days[0].date > days[1].date and old_to_new) or (
+        days[0].date < days[1].date and not old_to_new
+    ):
+        new_days.reverse()
+    return new_days
 
 
 def compound_anual_growth_rate(days: list, value_attr: str) -> float:
@@ -87,22 +103,19 @@ def max_drawdown(days: list, value_attr: str) -> dict:
             "percent": 0,
             "absolute": 0,
         }
-    reversed_days = days.copy()  # days is passed by reference, don't want to reverse the original
     ret = None
-    reversed_days.reverse()
-    assert days[0].date > days[-1].date, "MDD expected chronologically descending order"
-    values = [getattr(day, value_attr) for day in reversed_days]  # (list order is preserved)
+    days = copy_and_conditionally_reverse_days(days, old_to_new=True)
+    values = [getattr(day, value_attr) for day in days]  # (list order is preserved)
     index = 0
     peak = values[0]
-    peak_date = reversed_days[index].date
+    peak_date = days[index].date
     trough, trough_index = indexed_min(values)
-    trough_date = reversed_days[trough_index].date
+    trough_date = days[trough_index].date
     for index in range(len(values)):
-        # mdd_day = max_drawdown_at_day(reversed_days, day, value_attr, index)
         # if the new peak is higher than the old peak, raise the peak
         if values[index] > peak:
             peak = values[index]
-            peak_date = reversed_days[index].date
+            peak_date = days[index].date
         # if the index is higher than the previous trough_index, that trough now longer applies, so
         # we need to find a new one in the future of the current index
         future_values = values[index:]
@@ -110,9 +123,9 @@ def max_drawdown(days: list, value_attr: str) -> dict:
         if new_trough < trough or index > trough_index:
             trough = new_trough
             trough_index = new_trough_index + index  # trough_index is offset from today
-            trough_date = reversed_days[trough_index].date
+            trough_date = days[trough_index].date
         # calculate the new mdd and save it if it's lower as the return value
-        ratio = (trough - peak) / peak
+        ratio = 0 if peak == 0 else (trough - peak) / peak
         mdd = {
             "peak": peak,
             "peak_date": peak_date,
@@ -124,6 +137,7 @@ def max_drawdown(days: list, value_attr: str) -> dict:
         }
         if not ret or mdd["ratio"] < ret["ratio"]:
             ret = mdd
+    assert peak_date < trough_date  # This keeps happening...
     return ret
 
 
@@ -153,3 +167,51 @@ def get_metadata(days: list, value_attr: str):
         "20d_bollinger_band": bollinger_bands(values[:20]),
         "max_drawdown": max_drawdown(days, value_attr),
     }
+
+
+def sharpe_ratio(days: list, value_attr: str) -> float:
+    """I'm not sure if this is right..."""
+    if not days:
+        return 0
+    values = [getattr(day, value_attr) for day in days]
+    cagr = compound_anual_growth_rate(days, value_attr)
+    anualized_std_dev = standard_deviation(values) / len(days)
+    return (cagr - const.RISK_FREE_RATE) / anualized_std_dev
+
+
+def ___get_dicts_of_days_with_percent_change(days: list, value_attr: str) -> list:
+    """Return [{"date": datetime.date, "value": <#>, "percent": <#>}] where percent is the
+    change from one point to the next
+    """
+    days_pct = []
+    for i, day in enumerate(days):
+        if i == 0:
+            continue
+        yesterday = day[i - 1]
+        last_val = getattr(day, value_attr)
+        val = getattr(yesterday, value_attr)
+        percent = val / last_val - 1
+        days_pct.append({"date": day.date, "value": val, "percent": percent})
+    return days_pct
+
+
+def ___other_sharpe_ratio(days: list, value_attr: str) -> float:
+    """Calculate the sharpe ratio"""
+    if len(days) == 0:
+        return 0
+    days = copy_and_conditionally_reverse_days(days, old_to_new=True)
+    days_pct = get_dicts_of_days_with_percent_change(days, value_attr)
+    days.remove(days[0])  # pop the top element off the list - had to remove it for days_pct too
+    values = [getattr(day, value_attr) for day in days]
+    std_dev = standard_deviation(values)
+    avg_daily_pct
+    # ...............
+    days = days.copy()
+    return_of_portfolio = compound_anual_growth_rate(days, value_attr)
+    risk_free_rate = const.RISK_FREE_RATE
+    # standard_deviation(values)
+    # values = [getattr(day, value_attr) for days]
+    # sharpe_ratio = (return_of_portfolio - risk_free_rate) / excess_return_standard_deviation
+    # anualize by multiplying by the sqrt of the # of days
+    # number_of_days = len(days)
+    # anualized_sharpe = sharpe_ratio * math.sqrt(number_of_days)

@@ -39,3 +39,5 @@ SQL_DATABASE = env_var("SQL_DATABASE", "trade")
 
 # General settings
 TX_BROKERAGE_COMISSION = float(env_var("TX_BROKERAGE_COMISSION", 10.00))
+RISK_FREE_RATE = float(env_var("RISK_FREE_RETURN", 0.39))  # As of 2022-02-24
+ADJUST_FOR_DIVIDENDS = env_var("ADJUST_FOR_DIVIDENDS", True)

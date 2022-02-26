@@ -16,6 +16,7 @@ from kytrade.data import models
 from kytrade.data.db import get_document, set_document
 from kytrade.exceptions import InvalidStrategyActionName, InvalidTotalPortfolioAllocationPercentage
 from kytrade.ps import tx
+from kytrade.ps import metadata
 
 
 DOCUMENT = "actions"
@@ -56,19 +57,11 @@ def _assert_total_alloc_percent(percents: list, target: int) -> None:
         raise InvalidTotalPortfolioAllocationPercentage(f"{total_percents} != {target}")
 
 
-def rebalance(portfolio: models.Portfolio, cash: float = 0, stocks: dict = {}):
-    """Rebalance at best effort to given percentage allocations"""
-    percents_list = [float(cash)] + [float(v) for k, v in stocks.items()]
-    _assert_total_alloc_percent(percents_list, 100)
-    for symbol in stocks:
-        percent = stocks[symbol]
-        tx.rebalance_stock_position(portfolio, symbol, percent)
-
-
 def execute_action(portfolio: models.Portfolio, action_name: str, args: dict = {}) -> None:
     """Execute the named action with the given args in the given portfolio"""
     # same as condition, use some better mapping eventually
     if action_name == "rebalance":
-        rebalance(portfolio, cash=args["cash"], stocks=args["stocks"])
+        cash = float(args["cash"]) if args["cash"] else 0
+        tx.rebalance_stock_positions(portfolio, cash_pct=cash, stocks=args["stocks"])
     else:
         raise InvalidStrategyActionName(action_name)

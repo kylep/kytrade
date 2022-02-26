@@ -73,3 +73,11 @@ def test_max_drawdown():
     mdd = calc.max_drawdown(vals, "close")
     # raise Exception(mdd)
     assert mdd["ratio"] == -.5
+
+
+def test_sharpe_ratio():
+    """Test the Sharpe Ratio"""
+    # sharpe_ratio = (return_of_portfolio - risk_free_rate) / excess_return_standard_deviation
+    return True  # I have no idea what a valid sharpe ratio looks like... #TODO
+
+

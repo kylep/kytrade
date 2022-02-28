@@ -127,14 +127,14 @@ Frequency adjustments:
 ## Symbols
 
 - `VTI`: Vanguard Total Stock Market ETF
-  - div yield of ~1.5% not currently implemented
+  - div yield of ~1.5%, good growth
 - `BND`: Vanguard Total Bond Market ETF
   - it has super low volatility but very little growth
-  - div yield of 2.1% not currently implemented
+  - div yield of 2.1%
   - 0.07 correlation with VTI (from https://www.portfoliovisualizer.com/asset-correlations)
 - `TLT`: iShares 20+ Year Treasury Bond ETF
   - high liquidity, high volatility
-  - div yield of ~1.6% not currently implemented
+  - div yield of ~1.6%, some growth
   - -0.31 correlation with VTI
 
 ## Start date

@@ -64,6 +64,7 @@ def pay_brokerage_stock_comission(portfolio: models.Portfolio) -> None:
 
 def buy_stock(portfolio: models.Portfolio, symbol: str, qty: int, comp: bool = False) -> None:
     """Buy stock in the given portfolio"""
+    print(f"{str(portfolio.date)} - BUY {qty} {symbol}")
     sm = StockMarket()
     unit_price = sm.get_spot(symbol, portfolio.date).close
     total_price = unit_price * qty
@@ -77,6 +78,7 @@ def buy_stock(portfolio: models.Portfolio, symbol: str, qty: int, comp: bool = F
 
 def sell_stock(portfolio: models.Portfolio, symbol: str, qty: int) -> None:
     """Sell stock from the given portfolio"""
+    print(f"{str(portfolio.date)} - SELL {qty} {symbol}")
     sm = StockMarket()
     unit_price = sm.get_spot(symbol, portfolio.date).close
     total_price = unit_price * qty
@@ -139,6 +141,8 @@ def rebalance_stock_positions(portfolio: models.Portfolio, cash_pct: float, stoc
         elif required_shares < current_qty:
             qty = current_qty - required_shares
             sells.append({"symbol": symbol, "qty": qty})
+    print(f"SELLS: {sells}")
+    print(f"BUYS: {buys}")
     for stock in sells:
         sell_stock(portfolio, stock["symbol"], stock["qty"])
     for stock in buys:

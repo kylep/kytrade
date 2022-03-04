@@ -6,6 +6,7 @@ from beautifultable import BeautifulTable, ALIGN_LEFT
 from pprint import pprint
 
 import kytrade.ps.portfolio as ps
+import kytrade.strategy
 from kytrade import calc
 from kytrade.ps import metadata
 from kytrade.ps import simulator
@@ -23,19 +24,16 @@ def _get_ps_table(portfolios: list):
         print(f" CALC: {portfolio.name}                           ", end="\r")
         sp = portfolio.data["stock_positions"]
         positions = ",".join([f"{key}={sp[key]}" for key in sp.keys()])
-        value_days = metadata.value_days_history_named_tuples(portfolio)
-        cagr = calc.compound_anual_growth_rate(value_days, value_attr="total")
-        mdd = calc.max_drawdown(value_days, value_attr="total")
-        sharpe = calc.sharpe_ratio(value_days, value_attr="total")
+        date = str(portfolio.date)
         row = [
             portfolio.name,
             portfolio.data["date_opened"],
             str(portfolio.date),
             positions,
-            f"${metadata.total_value(portfolio):,.2f}",
-            f"{cagr:.2f}",
-            f"{mdd['percent']:.2f}",
-            sharpe
+            f"{portfolio.data['metadata'][date]['total_value']:,.2f}",
+            f"{portfolio.data['metadata'][date]['cagr']:.2f}",
+            f"{portfolio.data['metadata'][date]['max_draw_down']['percent']:.2f}",
+            f"{portfolio.data['metadata'][date]['sharpe_ratio']:.2f}",
         ]
         table.rows.append(row)
     return table
@@ -52,7 +50,7 @@ def portfolio_simulator():
 def create(name, date):
     """Create a simulated portfolio instance"""
     ps.create_portfolio(name, date)
-    portfolio = ps.get_portfolio(name)
+    portfolio = ps.get_portfolio(name, detailed=True)
     table = _get_ps_table([portfolio])
     click.echo(table)
 
@@ -60,7 +58,7 @@ def create(name, date):
 @click.command(name="list")
 def _list(details):
     """list instances"""
-    portfolios = ps.list_portfolios()
+    portfolios = ps.list_portfolios(detailed=details)
     if details:
         table = _get_ps_table(portfolios)
         click.echo(table)
@@ -74,16 +72,7 @@ def _list(details):
 @click.command()
 def describe(name):
     """Print a detailed overview of a portfolio instance"""
-    portfolio = ps.get_portfolio(name)
-    value_days = metadata.value_days_history_named_tuples(portfolio)
-    cagr = calc.compound_anual_growth_rate(value_days, value_attr="total")
-    mdd = calc.max_drawdown(value_days, value_attr="total")
-    sharpe = calc.sharpe_ratio(value_days, value_attr="total")
-    portfolio.data["metadata"] = {
-        "cagr": cagr,
-        "max_draw_down": mdd,
-        "sharpe_ratio": sharpe
-    }
+    portfolio = ps.get_portfolio(name, detailed=True)
     click.echo(json.dumps(portfolio.data, indent=2, default=str))
 
 

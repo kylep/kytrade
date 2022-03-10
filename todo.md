@@ -1,5 +1,7 @@
 # TODO List
 
+- update the todo list - whole thing is out of date :(
+
 ## Soon
 
 - AlphaVantage free data not useful (no split/div data), $50/month is expensive. Before buying Pro:

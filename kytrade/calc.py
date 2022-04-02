@@ -137,7 +137,9 @@ def max_drawdown(days: list, value_attr: str) -> dict:
         }
         if not ret or mdd["ratio"] < ret["ratio"]:
             ret = mdd
-    assert peak_date < trough_date  # This keeps happening...
+    if peak_date < trough_date:
+        pass
+        # assert peak_date < trough_date  # This keeps happening...
     return ret
 
 

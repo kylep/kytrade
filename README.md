@@ -73,15 +73,22 @@ source export.sh
 ```
 
 
-On MacOS, if you don't have the mysql client installed:
+On MacOS, even though you won't be running the server software on your workstation,
+you need to install these to allow their dependency packages to work. It's a pain.
+Pretty tempting to just move this whole thing into minikube or something.
 ```
 brew install mysql
+brew install postgresql
 ```
 
 Make a virtualenv and install the app.
-...The archflags var is required on macos else mysql client errors.
 ```
-virtualenv --python=python3 env/
+python3 -m virtualenv env/
+source env/bin/activate
+
+# M1 MacOS
+pip install -e .
+# Intel MacOS
 ARCHFLAGS="-arch x86_64" pip install -e .
 ```
 

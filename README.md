@@ -81,10 +81,19 @@ brew install mysql
 brew install postgresql
 ```
 
-Make a virtualenv and install the app.
+### Poetry Installer
+Use poetry to install the CLI and enter its shell.
 ```
-python3 -m virtualenv env/
-source env/bin/activate
+poetry install
+poetry shell
+```
+
+### Setuptools Installer
+Not sure if I'll keep this now that the Poetry installer exists.
+
+```
+python3 -m virtualenv .venv/
+source .venv/bin/activate
 
 # M1 MacOS
 pip install -e .

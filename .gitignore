@@ -1,6 +1,7 @@
 export.sh
 .DS_Store
 env/
+.venv/
 **egg-info
 db-data/
 database/
@@ -11,3 +12,4 @@ htmlcov/
 build/
 output/
 *.swo
+.vscode

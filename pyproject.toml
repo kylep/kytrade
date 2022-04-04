@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "kytrade"
+version = "1.0.0"
+description = "Kyle's trading tool"
+authors = ["kylep <kyle@pericak.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+SQLAlchemy = "^1.4.34"
+mysqlclient = "^2.1.0"
+psycopg2-binary = "^2.9.3"
+pandas = "^1.4.2"
+numpy = "^1.22.3"
+torch = "^1.11.0"
+matplotlib = "^3.5.1"
+alpha-vantage = "^2.3.1"
+click = "^8.1.2"
+beautifultable = "^1.0.1"
+gmpy2 = "^2.1.2"
+ib-insync = "^0.9.70"
+yfinance = "^0.1.70"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.1"
+pytest-mock = "^3.7.0"
+pytest-cov = "^3.0.0"
+black = "^22.3.0"
+pylint = "^2.13.4"
+alchemy-mock = "^0.4.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+kt = 'kytrade.cli.main:shell'

@@ -4,4 +4,3 @@ pytest-cov
 black
 pylint
 alchemy_mock
-pdb

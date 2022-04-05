@@ -21,12 +21,12 @@ VERSION = "1.0001"
 
 # Upstream API Keys
 # Currently *none* of these are required, Yahoo's data doesn't need an API key
-ALPHAVANTAGE_API_KEY = env_var("ALPHAVANTAGE_API_KEY", None, required=False)
-STOCKSHARK_API_KEY = env_var("STOCKSHARK_API_KEY", None, required=False)
-ALPACA_API_KEY_ID = env_var("ALPACA_API_KEY_ID", None, required=False)
-ALPACA_API_KEY_SECRET = env_var("ALPACA_API_KEY_SECRET", None, required=False)
+ALPHAVANTAGE_API_KEY = env_var("ALPHAVANTAGE_API_KEY", None)
+STOCKSHARK_API_KEY = env_var("STOCKSHARK_API_KEY", None)
+ALPACA_API_KEY_ID = env_var("ALPACA_API_KEY_ID", None)
+ALPACA_API_KEY_SECRET = env_var("ALPACA_API_KEY_SECRET", None)
 ALPACA_API_ENDPOINT = env_var("ALPACA_API_ENDPOINT", "https://paper-api.alpaca.markets")
-IEXCLOUD_API_KEY = env_var("IEXCLOUD_API_KEY", None, required=False)
+IEXCLOUD_API_KEY = env_var("IEXCLOUD_API_KEY", None)
 
 # Database
 SQLA_DRIVER = env_var("SQLA_DRIVER", "mysql")
@@ -34,7 +34,7 @@ SQLA_ECHO = env_var("SQLA_ECHO", False)
 SQL_HOST = env_var("SQL_HOST", "127.0.0.1")
 SQL_PORT = env_var("SQL_PORT", 3306)
 SQL_USER = env_var("SQL_USER", "root")
-SQL_PASS = env_var("SQL_PASS", None, required=True)
+SQL_PASS = env_var("SQL_PASS", "DUMMY_PASSWORD")
 SQL_DATABASE = env_var("SQL_DATABASE", "trade")
 
 # General settings

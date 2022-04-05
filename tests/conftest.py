@@ -22,4 +22,4 @@ def mock_time_series(mocker):
             }
             return (data, None)
 
-    mocker.patch("kytrade.api.alphavantage.TimeSeries", MockTimeSeries)
+    mocker.patch("kytrade.api.client.alphavantage.TimeSeries", MockTimeSeries)

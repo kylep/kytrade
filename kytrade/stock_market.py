@@ -8,7 +8,7 @@ from sqlalchemy import select, desc, delete
 from kytrade import calc
 
 # from kytrade.api import alphavantage
-from kytrade.api import yahoo
+from kytrade.api.client import yahoo
 from kytrade.data.db import get_session
 from kytrade.data.models import DailyStockPrice, Stock
 

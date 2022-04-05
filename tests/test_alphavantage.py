@@ -1,5 +1,5 @@
 """Test alphavantage.py"""
-import kytrade.api.alphavantage as av
+import kytrade.api.client.alphavantage as av
 
 
 def do_thing():

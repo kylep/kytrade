@@ -84,6 +84,7 @@ brew install postgresql
 ### Poetry Installer
 Use poetry to install the CLI and enter its shell.
 ```
+poetry config virtualenvs.in-project true
 poetry install
 poetry shell
 ```

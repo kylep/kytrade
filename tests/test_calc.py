@@ -12,7 +12,7 @@ Day = namedtuple("Day", "ticker, date close")  # ...quack
 @pytest.fixture
 def sample_stocks():
     """Return a list of sample stocks"""
-    Stock = namedtuple('Stock', 'ticker close')
+    Stock = namedtuple("Stock", "ticker close")
     return [Stock("FOO", 10), Stock("FOO", 20), Stock("FOO", 30)]
 
 
@@ -22,10 +22,7 @@ def test_compound_anual_growth_rate():
     years = 3
     days = 365.25 * years
     end_date = start_date + datetime.timedelta(days=days)
-    days = [
-        Day("Foo", end_date, 8000),
-        Day("FOO", start_date, 1000)
-    ]
+    days = [Day("Foo", end_date, 8000), Day("FOO", start_date, 1000)]
     assert calc.compound_anual_growth_rate(days, "close") == 100
 
 
@@ -49,7 +46,7 @@ def test_standard_dev(sample_stocks):
 
 def test_calc_min_max_index():
     """test indexed min max"""
-    data = [10,11,12,13,4,5,6,7,7,8,9]
+    data = [10, 11, 12, 13, 4, 5, 6, 7, 7, 8, 9]
     test_min, min_index = calc.indexed_min(data)
     assert test_min == min(data)
     assert min_index == 4
@@ -59,25 +56,23 @@ def test_max_drawdown():
     """test the max drawdown"""
     Day = namedtuple("Day", "date close")  # ...quack
     vals = [
-        Day( datetime.date.fromisoformat("2000-01-10"), 110),
-        Day( datetime.date.fromisoformat("2000-01-09"), 200),
-        Day( datetime.date.fromisoformat("2000-01-08"), 110),
-        Day( datetime.date.fromisoformat("2000-01-07"), 55),
-        Day( datetime.date.fromisoformat("2000-01-06"), 50),
-        Day( datetime.date.fromisoformat("2000-01-05"), 95),
-        Day( datetime.date.fromisoformat("2000-01-04"), 90),
-        Day( datetime.date.fromisoformat("2000-01-03"), 100),
-        Day( datetime.date.fromisoformat("2000-01-02"), 10),
-        Day( datetime.date.fromisoformat("2000-01-01"), 1),
+        Day(datetime.date.fromisoformat("2000-01-10"), 110),
+        Day(datetime.date.fromisoformat("2000-01-09"), 200),
+        Day(datetime.date.fromisoformat("2000-01-08"), 110),
+        Day(datetime.date.fromisoformat("2000-01-07"), 55),
+        Day(datetime.date.fromisoformat("2000-01-06"), 50),
+        Day(datetime.date.fromisoformat("2000-01-05"), 95),
+        Day(datetime.date.fromisoformat("2000-01-04"), 90),
+        Day(datetime.date.fromisoformat("2000-01-03"), 100),
+        Day(datetime.date.fromisoformat("2000-01-02"), 10),
+        Day(datetime.date.fromisoformat("2000-01-01"), 1),
     ]
     mdd = calc.max_drawdown(vals, "close")
     # raise Exception(mdd)
-    assert mdd["ratio"] == -.5
+    assert mdd["ratio"] == -0.5
 
 
 def test_sharpe_ratio():
     """Test the Sharpe Ratio"""
     # sharpe_ratio = (return_of_portfolio - risk_free_rate) / excess_return_standard_deviation
     return True  # I have no idea what a valid sharpe ratio looks like... #TODO
-
-

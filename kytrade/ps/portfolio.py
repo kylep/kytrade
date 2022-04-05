@@ -74,7 +74,7 @@ def create_portfolio(
     cash_operations: list = None,
     value_history: dict = None,
     strategies: list = None,
-    metadata: dict = None
+    metadata: dict = None,
 ) -> None:
     """Write portfolio state to DB"""
     # (W0511) Setting arguments as lists/dicts is dangerous - this is so tedious...
@@ -95,7 +95,7 @@ def create_portfolio(
         "cash_operations": cash_operations,
         "value_history": value_history,
         "strategies": strategies,
-        "metadata": metadata
+        "metadata": metadata,
     }
     portfolio = models.Portfolio(name=name, data=data, date=dt_date)
     session = db.get_session()
@@ -132,11 +132,10 @@ def get_portfolio(name: str, detailed: bool = False) -> dict:
     session = db.get_session()
     session.expire_on_commit = False
     result = session.execute(query).one()
-    portfolio =  result[0]
+    portfolio = result[0]
     if detailed:
         portfolio.data["metadata"][str(portfolio.date)] = get_metadata(portfolio)
     return portfolio
-
 
 
 def update_portfolio(portfolio: models.Portfolio):

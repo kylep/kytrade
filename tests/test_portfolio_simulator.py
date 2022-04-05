@@ -5,6 +5,7 @@ import kytrade.ps.portfolio as portfolio_simulator
 from kytrade.data import models
 from kytrade.stock_market import SpotPrice
 
+
 @pytest.fixture
 def mock_session(mocker):
     """SQLA PortfolioSim session()"""
@@ -31,6 +32,3 @@ def mock_stock_market_daily_price(mocker):
     ]
     m_dsp.return_value.get_spot.return_value = SpotPrice(100.11, 200.22)
     mocker.patch("kytrade.portfolio_simulator.StockMarket", m_dsp)
-
-
-

@@ -54,6 +54,7 @@ def create(name, date):
     table = _get_ps_table([portfolio])
     click.echo(table)
 
+
 @click.option("--details/--names", default=True, help="Use --names to only print names")
 @click.command(name="list")
 def _list(details):
@@ -65,7 +66,6 @@ def _list(details):
         return
     for portfolio in portfolios:
         click.echo(portfolio.name)
-
 
 
 @click.argument("name")

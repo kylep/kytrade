@@ -1,0 +1,5 @@
+__title__ = "kytrade"
+__description__ = "Kyle's trading tools"
+__url__ = "https://github.com/kylep/kytrade"
+__version__ = "1.0.0"
+__author__ = "Kyle Pericak"

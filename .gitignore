@@ -13,3 +13,5 @@ build/
 output/
 *.swo
 .vscode
+dist/
+old/

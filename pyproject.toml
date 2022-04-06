@@ -19,6 +19,7 @@ beautifultable = "^1.0.1"
 gmpy2 = "^2.1.2"
 ib-insync = "^0.9.70"
 yfinance = "^0.1.70"
+Flask = "^2.1.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.1"

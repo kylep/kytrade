@@ -320,9 +320,9 @@ bin/lint
 Run the unit tests
 ```
 # without coverage stats
-bin/unit-test
+bin/run-tests
 # with coverage stats
-bin/unit-test-coverage
+bin/test-coverage
 ```
 
 ## Debugging SQL

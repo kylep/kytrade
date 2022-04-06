@@ -3,7 +3,7 @@ import datetime
 from collections import namedtuple
 
 from kytrade.data import models
-from kytrade.stock_market import StockMarket
+from kytrade.stockmarket import StockMarket
 from kytrade.ps.enums import CashOperationAction
 
 

@@ -3,7 +3,7 @@ import pytest
 import datetime
 import kytrade.ps.portfolio as portfolio_simulator
 from kytrade.data import models
-from kytrade.stock_market import SpotPrice
+from kytrade.stockmarket import SpotPrice
 
 
 @pytest.fixture
@@ -15,8 +15,8 @@ def mock_session(mocker):
 
 
 @pytest.fixture
-def mock_stock_market_daily_price(mocker):
-    """kytrade.stock_market"""
+def mock_stockmarket_daily_price(mocker):
+    """kytrade.stockmarket"""
     m_dsp = mocker.MagicMock(name="m_dsp")
     m_dsp.return_value.get_daily_price.return_value = [
         models.DailyStockPrice(

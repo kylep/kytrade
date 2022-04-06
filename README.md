@@ -90,7 +90,7 @@ poetry shell
 ```
 
 ### Setuptools Installer
-Not sure if I'll keep this now that the Poetry installer exists.
+This is useful if  you want to install kytrade without poetry or in edit mode (`-e`).
 
 ```
 python3 -m virtualenv .venv/

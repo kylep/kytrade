@@ -2,7 +2,7 @@
 import sys
 import click
 from kytrade.const import VERSION
-from kytrade.cli.stock_market import sm
+from kytrade.cli.stockmarket import sm
 from kytrade.cli.init import init
 from kytrade.cli.strat.strat import strat
 from kytrade.cli.ps.portfolio_simulator import portfolio_simulator as ps

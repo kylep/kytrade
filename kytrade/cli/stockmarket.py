@@ -4,7 +4,7 @@ import json
 from pprint import pprint
 from beautifultable import BeautifulTable, ALIGN_LEFT
 
-from kytrade.stock_market import StockMarket, INDEXES
+from kytrade.stockmarket import StockMarket, INDEXES
 from kytrade.data.models import Stock
 
 

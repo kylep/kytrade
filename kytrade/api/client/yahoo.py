@@ -9,7 +9,7 @@ from kytrade.data.models import DailyStockPrice
 
 
 def get_daily_stock_history(symbol: str) -> list:
-    """Use yahoo finance to download daily stock data"""
+    """Use yahoo finance to download daily stock data, ordered oldest to newest"""
     start = datetime.datetime(1900, 1, 1)
     end = datetime.date.today()
     daily_stock_prices = []

@@ -9,16 +9,13 @@ from kytrade.data import models
 
 # future=False because pandas does not support 2.0 with to_sql yet
 # https://github.com/pandas-dev/pandas/issues/40460
-engine = sqlalchemy.create_engine(
-    (
-        f"{const.SQLA_DRIVER}://"
-        f"{const.SQL_USER}:{const.SQL_PASS}"
-        f"@{const.SQL_HOST}:{const.SQL_PORT}"
-        f"/{const.SQL_DATABASE}"
-    ),
-    echo=const.SQLA_ECHO,
-    future=False,
+CONN_STRING = (
+    f"{const.SQLA_DRIVER}://"
+    f"{const.SQL_USER}:{const.SQL_PASS}"
+    f"@{const.SQL_HOST}:{const.SQL_PORT}"
+    f"/{const.SQL_DATABASE}"
 )
+engine = sqlalchemy.create_engine(CONN_STRING, echo=const.SQLA_ECHO, future=False)
 
 
 def init_create_tables():
